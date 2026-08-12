@@ -1,0 +1,80 @@
+.top-header{
+    background: #2E7D32;
+    color: white;
+    padding: 18px 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.15);
+}
+
+.top-header h2{
+    margin: 0;
+    font-weight: bold;
+}
+
+.top-header p{
+    margin: 0;
+    opacity: .9;
+}
+
+body{
+    background: linear-gradient(
+        135deg,
+        #E8F5E9 0%,
+        #F4F8F4 50%,
+        #FFFFFF 100%
+    );
+    min-height: 100vh;
+}
+
+/* ID Preview Cards */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.10);
+  overflow: hidden;
+}
+
+.card-body {
+  background: #f9f9f9;
+}
+
+
+/* Card Header */
+.card-header{
+    background: #2E7D32;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+    padding: 12px 18px;
+}
+
+/* Input Focus */
+.form-control:focus,
+.form-select:focus{
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 .2rem rgba(46,125,50,.20);
+}
+/* Cylinder/pill-shaped button */
+.btn-pill {
+  border-radius: 999px !important;
+  padding: 8px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+/* Click animation — shrinks slightly on press, for a tactile "pushed" feel */
+.btn-pill:active,
+.btn-download:active {
+  transform: scale(0.94);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-download {
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.btn-download:hover {
+  transform: translateY(-1px);
+}
