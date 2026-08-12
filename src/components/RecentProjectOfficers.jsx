@@ -1,4 +1,4 @@
-import { formatDate } from "../styles/formDate";
+import { formatDate } from "../styles/formdate";
 
 export default function RecentProjectOfficers({ officers = [] }) {
   return (
