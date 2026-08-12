@@ -1,4 +1,4 @@
-import { formatDate } from "../../styles/formDate";
+import { formatDate } from "../../styles/formdate";
 import { API_BASE_URL } from "../../api/axios";
 const getImageUrl = (path) => {
   if (!path) return undefined;
