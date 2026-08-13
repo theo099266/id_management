@@ -1,24 +1,17 @@
 export default async function handler(req, res) {
   try {
-    // Get the requested URL path
-    const url = new URL(req.url, `https://${req.headers.host}`);
+    const { path } = req.query;
 
-    // Example:
-    // /api/users
-    // becomes:
-    // users
-    let targetPath = url.pathname.replace(/^\/api\/?/, "");
-
-    // Preserve query parameters
-    const queryString = url.search;
+    const targetPath = Array.isArray(path)
+      ? path.join("/")
+      : path || "";
 
     const backendUrl =
-      `http://id-management-api.runasp.net/api/${targetPath}${queryString}`;
+      `http://id-management-api.runasp.net/api/${targetPath}`;
 
     console.log("=================================");
     console.log("PROXY REQUEST");
     console.log("Method:", req.method);
-    console.log("Original URL:", req.url);
     console.log("Target Path:", targetPath);
     console.log("Backend:", backendUrl);
     console.log("=================================");
@@ -40,7 +33,7 @@ export default async function handler(req, res) {
       headers,
     };
 
-    // Forward body for POST, PUT, PATCH, DELETE, etc.
+    // Forward body for POST, PUT, PATCH, etc.
     if (!["GET", "HEAD"].includes(req.method)) {
       if (req.body !== undefined && req.body !== null) {
         options.body =
@@ -61,15 +54,15 @@ export default async function handler(req, res) {
     const data = await response.text();
 
     console.log("Backend status:", response.status);
-    console.log("Backend response:", data.substring(0, 1000));
+    console.log(
+      "Backend response:",
+      data.substring(0, 500)
+    );
 
     res.status(response.status).send(data);
 
   } catch (error) {
-    console.error("=================================");
-    console.error("PROXY ERROR");
-    console.error(error);
-    console.error("=================================");
+    console.error("PROXY ERROR:", error);
 
     res.status(502).json({
       error: "Proxy request failed",
