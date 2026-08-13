@@ -9,20 +9,14 @@ export default async function handler(req, res) {
     const backendUrl =
       `http://id-management-api.runasp.net/api/${targetPath}`;
 
-    console.log("=================================");
-    console.log("PROXY REQUEST");
-    console.log("Method:", req.method);
-    console.log("Backend:", backendUrl);
-    console.log("=================================");
+    console.log("PROXY:", req.method, backendUrl);
 
     const headers = {};
 
-    // Forward authorization
     if (req.headers.authorization) {
       headers.Authorization = req.headers.authorization;
     }
 
-    // Forward content type
     if (req.headers["content-type"]) {
       headers["Content-Type"] = req.headers["content-type"];
     }
@@ -32,7 +26,6 @@ export default async function handler(req, res) {
       headers,
     };
 
-    // Handle request body
     if (!["GET", "HEAD"].includes(req.method)) {
       if (req.body !== undefined && req.body !== null) {
         options.body =
@@ -44,22 +37,25 @@ export default async function handler(req, res) {
 
     const response = await fetch(backendUrl, options);
 
-    const contentType = response.headers.get("content-type");
-
-    if (contentType) {
-      res.setHeader("Content-Type", contentType);
-    }
-
     const data = await response.text();
 
-    res.status(response.status).send(data);
+    res.status(response.status);
+
+    if (response.headers.get("content-type")) {
+      res.setHeader(
+        "Content-Type",
+        response.headers.get("content-type")
+      );
+    }
+
+    res.send(data);
 
   } catch (error) {
-    console.error("PROXY ERROR:", error);
+    console.error(error);
 
     res.status(502).json({
       error: "Proxy request failed",
-      details: error.message,
+      details: error.message
     });
   }
 }
