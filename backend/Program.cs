@@ -17,23 +17,16 @@ DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 
-// Database connection
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1";
-var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
-var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "1433";   // ADD THIS
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "sa";
 var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "";
 var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "ID_management_system";
 
-
 var connectionString =
-    $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPassword};";
-
-
+    $"Server={dbHost},{dbPort};Database={dbName};User Id={dbUser};Password={dbPassword};TrustServerCertificate=True;";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString)
-    ));
+    options.UseSqlServer(connectionString));
 builder.Services
 .AddIdentity<ApplicationUser, IdentityRole<int>>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -86,9 +79,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "https://id-management-silk.vercel.app"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -132,8 +128,9 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
     };
 });
-builder.Services.AddSingleton(new AiBackgroundRemover(
-    Path.Combine(builder.Environment.ContentRootPath, "Models", "u2net.onnx")));
+builder.Services.AddSingleton<AiBackgroundRemover>(sp =>
+    new AiBackgroundRemover(
+        Path.Combine(builder.Environment.ContentRootPath, "Models", "u2net.onnx")));
 
 
 // Swagger
