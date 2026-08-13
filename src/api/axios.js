@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// Keep this export because other components import it
+export const API_BASE_URL = "/api";
+
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: API_BASE_URL,
 });
 
 api.interceptors.request.use(
