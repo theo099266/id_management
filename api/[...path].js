@@ -1,19 +1,13 @@
 export default async function handler(req, res) {
   try {
-    // Get the requested URL path
     const url = new URL(req.url, `https://${req.headers.host}`);
-
-    // Example:
-    // /api/users
-    // becomes:
-    // users
     let targetPath = url.pathname.replace(/^\/api\/?/, "");
-
-    // Preserve query parameters
     const queryString = url.search;
 
-    const backendUrl =
-      `http://id-management-api.runasp.net/api/${targetPath}${queryString}`;
+    const isUploadsPath = targetPath.startsWith("uploads/");
+    const backendUrl = isUploadsPath
+      ? `http://id-management-api.runasp.net/${targetPath}${queryString}`
+      : `http://id-management-api.runasp.net/api/${targetPath}${queryString}`;
 
     console.log("=================================");
     console.log("PROXY REQUEST");
