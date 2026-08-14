@@ -88,7 +88,7 @@ useEffect(() => {
     if (!selectedUser) return;
 
     try {
-      const response = await api.post("/auth/admin-reset-password", {
+      const response = await api.post("/Auth/admin-reset-password", {
         userId: selectedUser.id,
         newPassword,
       });
@@ -250,13 +250,13 @@ useEffect(() => {
 
         // Change password only if something was entered
         if (form.passwordHash.trim() !== "") {
-          await api.post("/auth/admin-reset-password", {
+          await api.post("/Auth/admin-reset-password", {
             userId: editUser.id,
             newPassword: form.passwordHash,
           });
         }
       } else {
-        await api.post("/auth/register", formData, {
+        await api.post("/Auth/register", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
