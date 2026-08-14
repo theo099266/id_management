@@ -126,12 +126,22 @@ export default function ProjectOfficers() {
     }
   };
 
-  const getImageUrl = (path) => {
-    if (!path) return "";
-    return path.startsWith("http")
-      ? path
-      : `${API_BASE_URL}/${path.replace(/^\//, "")}`;
-  };
+  const BACKEND_URL = "https://id-management-api.runasp.net";
+
+const getImageUrl = (path) => {
+  if (!path) return "";
+
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:image") ||
+    path.startsWith("blob:")
+  ) {
+    return path;
+  }
+
+  return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
+};
 
   const loadAdministratives = async () => {
     try {

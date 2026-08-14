@@ -101,14 +101,22 @@ const Pop_up_view = ({ employee, onClose, onEdit }) => {
     validatedSignature: null,
     loading: true,
   });
+const BACKEND_URL = "https://id-management-api.runasp.net";
 
-  const getImageUrl = (path) => {
-    if (!path) return "";
-    return path.startsWith("http")
-      ? path
-      : `${API_BASE_URL}/${path.replace(/^\//, "")}`;
-  };
+const getImageUrl = (path) => {
+  if (!path) return "";
 
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:image") ||
+    path.startsWith("blob:")
+  ) {
+    return path;
+  }
+
+  return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
+};
   // Signatures are normalized server-side on every request — route them
   // through the normalize endpoint instead of the raw uploaded file.
   const getNormalizedSignatureUrl = (path) => {

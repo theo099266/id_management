@@ -1,18 +1,22 @@
 import { formatDate } from "../../styles/formdate";
 import { API_BASE_URL } from "../../api/axios";
+const BACKEND_URL = "https://id-management-api.runasp.net";
+
 const getImageUrl = (path) => {
   if (!path) return undefined;
 
   if (
     path.startsWith("http://") ||
     path.startsWith("https://") ||
-    path.startsWith("data:image")
+    path.startsWith("data:image") ||
+    path.startsWith("blob:")
   ) {
     return path;
   }
 
-  return `${API_BASE_URL}/${path.replace(/^\/+/, "")}`;
+  return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
 };
+
 const splitPosition = (text) => {
   if (!text) return [""];
   return text
