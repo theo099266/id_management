@@ -4,17 +4,26 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-
+using System.Threading;
 namespace Backend.Services
 {
     public class AiBackgroundRemover : IDisposable
     {
-        private readonly InferenceSession _session;
+        private readonly Lazy<InferenceSession> _sessionLazy;
+        private InferenceSession Session => _sessionLazy.Value;
         private const int ModelSize = 320; // U²-Net standard input size
 
         public AiBackgroundRemover(string modelPath)
         {
-            _session = new InferenceSession(modelPath);
+            // Don't touch the native ONNX runtime here — defer until first real use.
+            // This means DI can construct this service (and anything that depends on it,
+            // including unrelated controllers) even on hosts where the native ONNX
+            // binaries can't load. The failure only surfaces when background removal
+            // is actually invoked.
+            _sessionLazy = new Lazy<InferenceSession>(
+    () => new InferenceSession(modelPath),
+    LazyThreadSafetyMode.ExecutionAndPublication
+);
         }
 
         /// <summary>
@@ -46,10 +55,10 @@ namespace Backend.Services
                 }
             });
 
-            var inputName = _session.InputMetadata.Keys.First();
+            var inputName = Session.InputMetadata.Keys.First();
             var inputs = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor(inputName, input) };
 
-            using var results = await Task.Run(() => _session.Run(inputs));
+            using var results = await Task.Run(() => Session.Run(inputs));
             var output = results.First().AsTensor<float>(); // shape [1,1,320,320] saliency map
 
             // Build a grayscale mask image at model resolution, then resize up to original size
@@ -101,6 +110,10 @@ namespace Backend.Services
             return ms.ToArray();
         }
 
-        public void Dispose() => _session?.Dispose();
+        public void Dispose()
+        {
+            if (_sessionLazy.IsValueCreated)
+                _sessionLazy.Value.Dispose();
+        }
     }
 }

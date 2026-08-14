@@ -23,7 +23,6 @@ export default async function handler(req, res) {
 
     const headers = {};
 
-    // Forward important headers
     if (req.headers.authorization) {
       headers.Authorization = req.headers.authorization;
     }
@@ -37,7 +36,6 @@ export default async function handler(req, res) {
       headers,
     };
 
-    // Forward body for POST/PUT/PATCH
     if (!["GET", "HEAD"].includes(req.method)) {
       if (req.body !== undefined && req.body !== null) {
         options.body =
@@ -67,7 +65,6 @@ export default async function handler(req, res) {
       );
     }
 
-    // Handle files/binary responses
     if (
       contentType &&
       (
@@ -85,7 +82,6 @@ export default async function handler(req, res) {
         .send(buffer);
     }
 
-    // Handle normal JSON/text responses
     const data = await response.text();
 
     console.log(
@@ -98,18 +94,7 @@ export default async function handler(req, res) {
       .send(data);
 
   } catch (error) {
-    console.error(
-      "================================="
-    );
-
-    console.error(
-      "UPLOAD PROXY ERROR:",
-      error
-    );
-
-    console.error(
-      "================================="
-    );
+    console.error("UPLOAD PROXY ERROR:", error);
 
     return res.status(502).json({
       error: "Upload proxy failed",
