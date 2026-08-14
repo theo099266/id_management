@@ -13,21 +13,21 @@ import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import useTableSort from "../components/useTableSort";
 import SortableHeader from "../components/SortableHeader";
-const getImageSrc = (image) => {
-  if (!image) return null;
+const BACKEND_URL = "https://id-management-api.runasp.net";
+
+const getImageUrl = (path) => {
+  if (!path) return "";
+
   if (
-    image.startsWith("data:image") ||
-    image.startsWith("http://") ||
-    image.startsWith("https://")
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:image") ||
+    path.startsWith("blob:")
   ) {
-    return image;
+    return path;
   }
 
-  if (image.startsWith("/")) {
-    return `${API_BASE_URL}${image}`;
-  }
-
-  return `${API_BASE_URL}/uploads/profiles/${image}`;
+  return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
 };
 
 export default function Templates() {
