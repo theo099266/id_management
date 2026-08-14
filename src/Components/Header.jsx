@@ -5,7 +5,7 @@ import { API_BASE_URL } from "../api/axios";
 
 const BACKEND_URL = "https://id-management-api.runasp.net";
 
-const getImageUrl = (path) => {
+const getImageSrc = (path) => {
   if (!path) return "";
 
   if (

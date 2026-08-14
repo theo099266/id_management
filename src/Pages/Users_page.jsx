@@ -15,7 +15,7 @@ import useTableSort from "../components/useTableSort";
 import SortableHeader from "../components/SortableHeader";
 const BACKEND_URL = "https://id-management-api.runasp.net";
 
-const getImageUrl = (path) => {
+const getImageSrc = (path) => {
   if (!path) return "";
 
   if (
