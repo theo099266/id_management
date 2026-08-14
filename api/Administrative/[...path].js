@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req, res) {
   console.log("=================================");
   console.log("🔥 ADMINISTRATIVE VERCEL FUNCTION HIT");
@@ -10,12 +16,6 @@ export default async function handler(req, res) {
       req.url,
       `https://${req.headers.host}`
     );
-
-    // /api/Administrative
-    // /api/Administrative/123
-    // /api/Administrative/byUser/5
-    // /api/Administrative/123/image
-    // /api/Administrative/123/reprocess
 
     const targetPath = url.pathname.replace(
       /^\/api\/Administrative\/?/,
@@ -30,10 +30,12 @@ export default async function handler(req, res) {
 
     const headers = {};
 
+    // Forward authorization
     if (req.headers.authorization) {
       headers.Authorization = req.headers.authorization;
     }
 
+    // Forward content type INCLUDING multipart boundary
     if (req.headers["content-type"]) {
       headers["Content-Type"] = req.headers["content-type"];
     }
@@ -43,12 +45,16 @@ export default async function handler(req, res) {
       headers,
     };
 
+    // Forward the raw request body
     if (!["GET", "HEAD"].includes(req.method)) {
-      if (req.body !== undefined && req.body !== null) {
-        options.body =
-          typeof req.body === "string"
-            ? req.body
-            : JSON.stringify(req.body);
+      const chunks = [];
+
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+
+      if (chunks.length > 0) {
+        options.body = Buffer.concat(chunks);
       }
     }
 
@@ -64,26 +70,26 @@ export default async function handler(req, res) {
       response.status
     );
 
-    const contentType =
+    const responseContentType =
       response.headers.get("content-type");
 
-    if (contentType) {
+    if (responseContentType) {
       res.setHeader(
         "Content-Type",
-        contentType
+        responseContentType
       );
     }
 
-    const data = await response.text();
+    const data = await response.arrayBuffer();
 
     console.log(
-      "Backend response:",
-      data.substring(0, 1000)
+      "Backend response bytes:",
+      data.byteLength
     );
 
     res
       .status(response.status)
-      .send(data);
+      .send(Buffer.from(data));
 
   } catch (error) {
     console.error(

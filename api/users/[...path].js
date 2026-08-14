@@ -1,7 +1,6 @@
 // IMPORTANT:
 // Disable Vercel's automatic body parser.
-// Needed so multipart/form-data (register with image upload)
-// passes through untouched.
+// Needed so multipart/form-data (PUT with image upload) passes through untouched.
 export const config = {
   api: {
     bodyParser: false,
@@ -10,7 +9,7 @@ export const config = {
 
 export default async function handler(req, res) {
   console.log("=================================");
-  console.log("🔥 AUTH VERCEL FUNCTION HIT");
+  console.log("🔥 USERS VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
   console.log("=================================");
@@ -18,11 +17,12 @@ export default async function handler(req, res) {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
 
-    // /api/Auth/login -> login   (case-insensitive, matches Auth/auth/AUTH)
-    const targetPath = url.pathname.replace(/^\/api\/Auth\/?/i, "");
+    // /api/users/2  -> "2"
+    // /api/users    -> ""
+    const targetPath = url.pathname.replace(/^\/api\/users\/?/i, "");
 
     const backendUrl =
-      `https://id-management-api.runasp.net/api/Auth/${targetPath}${url.search}`;
+      `https://id-management-api.runasp.net/api/users${targetPath ? `/${targetPath}` : ""}${url.search}`;
 
     console.log("Backend:", backendUrl);
 
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     };
 
     // Forward the raw request stream — do NOT JSON.stringify(req.body).
-    // This is what lets FormData (with files) pass through intact.
+    // This is what lets FormData (with files) pass through intact for PUT.
     if (!["GET", "HEAD"].includes(req.method)) {
       options.body = req;
     }
@@ -64,6 +64,20 @@ export default async function handler(req, res) {
       res.setHeader("Content-Type", contentType);
     }
 
+    // Image / file passthrough (e.g. if a GET ever returns a file directly)
+    if (
+      contentType &&
+      (
+        contentType.startsWith("image/") ||
+        contentType.startsWith("application/octet-stream") ||
+        contentType.includes("pdf") ||
+        contentType.includes("zip")
+      )
+    ) {
+      const buffer = Buffer.from(await response.arrayBuffer());
+      return res.status(response.status).send(buffer);
+    }
+
     const data = await response.text();
 
     console.log("Backend response:", data.substring(0, 1000));
@@ -71,11 +85,11 @@ export default async function handler(req, res) {
     res.status(response.status).send(data);
   } catch (error) {
     console.error("=================================");
-    console.error("AUTH PROXY ERROR:", error);
+    console.error("USERS PROXY ERROR:", error);
     console.error("=================================");
 
     res.status(502).json({
-      error: "Auth proxy failed",
+      error: "Users proxy failed",
       details: error.message,
     });
   }
