@@ -6,8 +6,8 @@ export default async function handler(req, res) {
 
     const isUploadsPath = targetPath.startsWith("uploads/");
     const backendUrl = isUploadsPath
-      ? `http://id-management-api.runasp.net/${targetPath}${queryString}`
-      : `http://id-management-api.runasp.net/api/${targetPath}${queryString}`;
+       ? `https://id-management-api.runasp.net/${targetPath}${queryString}`
+      : `https://id-management-api.runasp.net/api/${targetPath}${queryString}`;
 
     console.log("=================================");
     console.log("PROXY REQUEST");
