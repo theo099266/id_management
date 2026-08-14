@@ -1,57 +1,20 @@
-const CONTROLLER_CASE_MAP = {
-  administrative: "Administrative",
-  auth: "Auth",
-  health: "Health",
-  projectofficers: "ProjectOfficers",
-  signatories: "Signatories",
-  signatures: "signatures",
-  template: "Template",
-  users: "users",
-};
-
 export default async function handler(req, res) {
-  try {
-    console.log("=================================");
-    console.log("VERCEL PROXY HIT");
-    console.log("Method:", req.method);
-    console.log("URL:", req.url);
-    console.log("=================================");
+  console.log("🔥 AUTH VERCEL FUNCTION HIT");
+  console.log("Method:", req.method);
+  console.log("URL:", req.url);
 
+  try {
     const url = new URL(req.url, `https://${req.headers.host}`);
 
-    // Remove /api/ from the beginning
-    let targetPath = url.pathname.replace(/^\/api\/?/, "");
+    // /api/auth/login -> login
+    const targetPath = url.pathname
+      .replace(/^\/api\/auth\/?/, "");
 
-    const queryString = url.search;
+    const backendUrl =
+      `https://id-management-api.runasp.net/api/Auth/${targetPath}${url.search}`;
 
-    // Fix controller casing
-    const segments = targetPath.split("/");
-
-    if (segments.length > 0) {
-      const firstSegmentLower = segments[0].toLowerCase();
-
-      if (CONTROLLER_CASE_MAP[firstSegmentLower]) {
-        segments[0] = CONTROLLER_CASE_MAP[firstSegmentLower];
-        targetPath = segments.join("/");
-      }
-    }
-
-    // Handle uploads separately
-    const isUploadsPath = targetPath
-      .toLowerCase()
-      .startsWith("uploads/");
-
-    const backendUrl = isUploadsPath
-      ? `https://id-management-api.runasp.net/${targetPath}${queryString}`
-      : `https://id-management-api.runasp.net/api/${targetPath}${queryString}`;
-
-    console.log("PROXY REQUEST");
-    console.log("Method:", req.method);
-    console.log("Original URL:", req.url);
-    console.log("Target Path:", targetPath);
     console.log("Backend:", backendUrl);
 
-    // Forward headers
     const headers = {};
 
     if (req.headers.authorization) {
@@ -67,7 +30,6 @@ export default async function handler(req, res) {
       headers,
     };
 
-    // Forward request body
     if (!["GET", "HEAD"].includes(req.method)) {
       if (req.body !== undefined && req.body !== null) {
         options.body =
@@ -76,8 +38,6 @@ export default async function handler(req, res) {
             : JSON.stringify(req.body);
       }
     }
-
-    console.log("Sending request to backend...");
 
     const response = await fetch(backendUrl, options);
 
@@ -91,22 +51,15 @@ export default async function handler(req, res) {
 
     const data = await response.text();
 
-    console.log(
-      "Backend response:",
-      data.substring(0, 1000)
-    );
+    console.log("Backend response:", data.substring(0, 1000));
 
     res.status(response.status).send(data);
 
   } catch (error) {
-
-    console.error("=================================");
-    console.error("PROXY ERROR");
-    console.error(error);
-    console.error("=================================");
+    console.error("AUTH PROXY ERROR:", error);
 
     res.status(502).json({
-      error: "Proxy request failed",
+      error: "Auth proxy failed",
       details: error.message,
     });
   }
