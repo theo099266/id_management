@@ -37,6 +37,7 @@ export default async function handler(req, res) {
     if (!["GET", "HEAD"].includes(req.method) && req.body != null) {
       options.body = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
     }
+    
 
     const response = await fetch(backendUrl, options);
     const contentType = response.headers.get("content-type");
