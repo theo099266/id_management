@@ -121,7 +121,7 @@ const getImageUrl = (path) => {
   // through the normalize endpoint instead of the raw uploaded file.
   const getNormalizedSignatureUrl = (path) => {
     if (!path) return "";
-    return `${API_BASE_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
+    return `${BACKEND_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
   };
 
   const employeeData = employee

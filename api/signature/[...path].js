@@ -16,6 +16,7 @@ export default async function handler(req, res) {
       ""
     );
 
+    // Prevent accidental double slash
     const backendUrl =
       `https://id-management-api.runasp.net/api/signatures/${targetPath}${url.search}`;
 
@@ -28,18 +29,16 @@ export default async function handler(req, res) {
       headers.Authorization = req.headers.authorization;
     }
 
-    const response = await fetch(
-      backendUrl,
-      {
-        method: req.method,
-        headers,
-      }
-    );
+    if (req.headers["content-type"]) {
+      headers["Content-Type"] = req.headers["content-type"];
+    }
 
-    console.log(
-      "Backend status:",
-      response.status
-    );
+    const response = await fetch(backendUrl, {
+      method: req.method,
+      headers,
+    });
+
+    console.log("Backend status:", response.status);
 
     const contentType =
       response.headers.get("content-type");
@@ -58,19 +57,8 @@ export default async function handler(req, res) {
       .send(Buffer.from(data));
 
   } catch (error) {
-    console.error(
-      "================================="
-    );
-
-    console.error(
-      "🔥 SIGNATURES PROXY ERROR"
-    );
-
+    console.error("🔥 SIGNATURES PROXY ERROR");
     console.error(error);
-
-    console.error(
-      "================================="
-    );
 
     return res.status(502).json({
       error: "Signatures proxy failed",
