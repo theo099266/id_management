@@ -113,9 +113,10 @@ export default async function handler(req, res) {
     // ============================================================
 
     const options = {
-      method: req.method,
-      headers,
-    };
+  method: req.method,
+  headers,
+  duplex: "half",
+};
 
     // ============================================================
     // FORWARD ORIGINAL REQUEST BODY
