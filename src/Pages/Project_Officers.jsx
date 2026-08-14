@@ -620,26 +620,23 @@ const getImageUrl = (path) => {
       form.removeImageBackground ? "true" : "false",
     );
 
-    if (editingItem) {
-      await api.put(
-  `${ENDPOINT}/${editingItem.administrativeID}`,
-  formData
-);
-    } else {
-      await api.post(ENDPOINT, formData);
-      savedId = res.data?.id ?? res.data?.ID;
-    }
+      if (editingItem) {
+    await api.put(`${ENDPOINT}/${editingItem.id}`, formData);
+  } else {
+    const createRes = await api.post(ENDPOINT, formData);
+    savedId = createRes.data?.id ?? createRes.data?.ID;
+  }
 
-    const res = await api.get(ENDPOINT);
-    const freshOfficers = res.data || [];
-    setOfficers(freshOfficers);
+  const res = await api.get(ENDPOINT);
+  const freshOfficers = res.data || [];
+  setOfficers(freshOfficers);
 
-    const savedOfficer =
-      freshOfficers.find((o) => o.id === savedId) ||
-      freshOfficers.find((o) => o.employee_Id_NO === form.employeeIdNo);
+  const savedOfficer =
+    freshOfficers.find((o) => o.id === savedId) ||
+    freshOfficers.find((o) => o.employee_Id_NO === form.employeeIdNo);
 
-    return savedOfficer;
-  };
+  return savedOfficer;
+};
   const selectedTemplate = useMemo(
     () =>
       templates.find((t) => String(t.templateID) === String(form.templateId)),
