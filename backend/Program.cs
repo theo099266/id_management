@@ -128,9 +128,6 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsync("Too many requests. Please try again later.", token);
     };
 });
-builder.Services.AddSingleton<AiBackgroundRemover>(sp =>
-    new AiBackgroundRemover(
-        Path.Combine(builder.Environment.ContentRootPath, "Models", "u2net.onnx")));
 
 
 // Swagger

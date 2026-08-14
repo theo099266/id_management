@@ -1,4 +1,3 @@
-c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Models\u2net.onnx
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\backend.exe
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\appsettings.Development.json
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\appsettings.json

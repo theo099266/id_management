@@ -22,7 +22,7 @@ namespace Backend.Models
         [Column("image_path")]
 public string? ImagePath { get; set; }
 
-        public ICollection<Signatory>? Signatories { get; set; }
-        public ICollection<Signatory>? Project_Officers { get; set; }
+
+        public ICollection<Project_Officers>? Project_Officers { get; set; }
     }
 }

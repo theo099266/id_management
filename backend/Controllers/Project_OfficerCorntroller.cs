@@ -14,13 +14,11 @@ namespace Backend.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
-        private readonly AiBackgroundRemover _bgRemover;
 
-        public ProjectOfficersController(ApplicationDbContext context, IWebHostEnvironment env, AiBackgroundRemover bgRemover)
+        public ProjectOfficersController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
             _env = env;
-            _bgRemover = bgRemover;
         }
 
         [HttpGet]
@@ -154,11 +152,7 @@ namespace Backend.Controllers
 
                 TemplateID = template.TemplateID,
 
-                ImagePath = request.RemoveImageBackground
-                    ? await SaveImageWithAiBackgroundRemovalAsync(
-                        request.Image, "profiles")
-                    : await SavePlainImageAsync(
-                        request.Image, "profiles"),
+                ImagePath = await SavePlainImageAsync(request.Image, "profiles"),
 
                 Signaturepath = await SaveAndRemoveBackgroundAsync(
                     request.Signature,
@@ -209,38 +203,9 @@ namespace Backend.Controllers
                         System.IO.File.Delete(oldImgPath);
                 }
 
-                officer.ImagePath = request.RemoveImageBackground
-                    ? await SaveImageWithAiBackgroundRemovalAsync(request.Image, "profiles")
-                    : await SavePlainImageAsync(request.Image, "profiles");
+                 officer.ImagePath = await SavePlainImageAsync(request.Image, "profiles");
             }
-            else if (request.RemoveImageBackground && !string.IsNullOrEmpty(officer.ImagePath))
-            {
-                // User DID NOT upload a new image, but wants to remove the background
-                var oldImgPath = Path.Combine(
-                    _env.ContentRootPath,
-                    officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-
-                if (System.IO.File.Exists(oldImgPath))
-                {
-                    var imageBytes = await System.IO.File.ReadAllBytesAsync(oldImgPath);
-
-                    var pngBytes = await _bgRemover.RemoveBackgroundAsync(imageBytes);
-
-                    var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", "profiles");
-                    Directory.CreateDirectory(uploadsFolder);
-
-                    var fileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_profile.png";
-                    var newPath = Path.Combine(uploadsFolder, fileName);
-
-                    await System.IO.File.WriteAllBytesAsync(newPath, pngBytes);
-
-                    // Delete the old image
-                    System.IO.File.Delete(oldImgPath);
-
-                    officer.ImagePath = Path.Combine("uploads", "profiles", fileName)
-                        .Replace("\\", "/");
-                }
-            }
+           
 
 
             if (request.Signature != null && request.Signature.Length > 0)
@@ -382,25 +347,6 @@ namespace Backend.Controllers
             return NoContent();
         }
 
-        private async Task<string?> SaveImageWithAiBackgroundRemovalAsync(IFormFile? file, string folderName)
-        {
-            if (file == null || file.Length == 0)
-                return null;
-
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            var inputBytes = ms.ToArray();
-
-            var pngBytes = await _bgRemover.RemoveBackgroundAsync(inputBytes);
-
-            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
-            Directory.CreateDirectory(uploadsFolder);
-            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileNameWithoutExtension(file.FileName)}.png";
-            var fullPath = Path.Combine(uploadsFolder, safeFileName);
-
-            await System.IO.File.WriteAllBytesAsync(fullPath, pngBytes);
-            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-        }
 
         private async Task<string?> SavePlainImageAsync(IFormFile? file, string folderName)
         {
@@ -641,6 +587,5 @@ namespace Backend.Controllers
         public IFormFile? Image { get; set; }
         public IFormFile? Signature { get; set; }
         public string? BackgroundColor { get; set; }
-        public bool RemoveImageBackground { get; set; } = false;
     }
 }

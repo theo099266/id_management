@@ -18,7 +18,6 @@ namespace Backend
         }
 
 
-        public DbSet<Signatory> Signatories { get; set; }
         public DbSet<Project_Officers> Project_Officers { get; set; }
         public DbSet<Template> Templates { get; set; }
 
@@ -42,12 +41,7 @@ namespace Backend
             //     b.Ignore(u => u.LockoutEnabled);
             //     b.Ignore(u => u.AccessFailedCount);
             // });
-            modelBuilder.Entity<Signatory>()
-                .HasOne(s => s.CreatedByUser)
-                .WithMany()
-                .HasForeignKey(s => s.CreatedBy)
-                .OnDelete(DeleteBehavior.SetNull);
-            //.OnDelete(DeleteBehavior.Restrict);
+        
             modelBuilder.Entity<Project_Officers>()
                 .HasOne(s => s.CreatedByUser)
                 .WithMany()

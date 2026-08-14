@@ -16,6 +16,7 @@ import useDragAndDrop from "../components/useDragAndDrop";
 import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import DatePicker from "../components/DatePicker";
+import { removeBackground } from "@imgly/background-removal";
 const ENDPOINT = "/ProjectOfficers";
 
 const BLOOD_TYPES = [
@@ -61,6 +62,7 @@ export default function ProjectOfficers() {
   const [officeType, setOfficeType] = useState(
     () => sessionStorage.getItem("officeTypeFilter") || "",
   );
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [search, setSearch] = useState("");
   const [previewItem, setPreviewItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -125,6 +127,31 @@ export default function ProjectOfficers() {
       setIsLoading(false);
     }
   };
+  const handleRemoveBackgroundClick = async () => {
+  setIsRemovingBg(true);
+  try {
+    // Use the freshly-selected file if there is one, otherwise
+    // grab whatever image is currently shown (e.g. existing server image)
+    const source = form.image || imagePreviewUrl;
+    if (!source) return;
+
+    const resultBlob = await removeBackground(source);
+    const file = new File([resultBlob], "photo.png", { type: "image/png" });
+
+    if (imagePreviewUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+
+    const newUrl = URL.createObjectURL(resultBlob);
+    setForm((prev) => ({ ...prev, image: file }));
+    setImagePreviewUrl(newUrl);
+  } catch (err) {
+    console.error("Background removal failed", err);
+    alert("Couldn't remove the background. Try again.");
+  } finally {
+    setIsRemovingBg(false);
+  }
+};
 
   const BACKEND_URL = "https://id-management-api.runasp.net";
 
@@ -978,31 +1005,25 @@ const getImageUrl = (path) => {
                   />
                 </label>
                 {imagePreviewUrl && (
-                  <div className="mt-2 space-y-2">
-                    <label className="flex items-center gap-2 text-sm text-gray-600">
-                      <input
-                        type="checkbox"
-                        checked={form.removeImageBackground || false}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            removeImageBackground: e.target.checked,
-                          })
-                        }
-                        className="w-4 h-4"
-                      />
-                      Remove background from photo
-                    </label>
+  <div className="mt-2 space-y-2">
+    <button
+      type="button"
+      onClick={handleRemoveBackgroundClick}
+      disabled={isRemovingBg}
+      className="w-full flex items-center justify-center gap-2 text-green-700 hover:text-green-900 text-sm border rounded-lg py-2 disabled:opacity-60"
+    >
+      {isRemovingBg ? "Removing background..." : "Remove background from photo"}
+    </button>
 
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-800 text-sm border rounded-lg py-2"
-                    >
-                      <FaTrash size={12} /> Remove photo
-                    </button>
-                  </div>
-                )}
+    <button
+      type="button"
+      onClick={removeImage}
+      className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-800 text-sm border rounded-lg py-2"
+    >
+      <FaTrash size={12} /> Remove photo
+    </button>
+  </div>
+)}
               </div>
 
               {/* RIGHT: text fields */}

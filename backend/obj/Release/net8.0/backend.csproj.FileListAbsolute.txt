@@ -262,4 +262,3 @@ C:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\obj\Release\net8.0
 C:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\obj\Release\net8.0\backend.pdb
 C:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\obj\Release\net8.0\backend.genruntimeconfig.cache
 C:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\obj\Release\net8.0\ref\backend.dll
-C:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\Models\u2net.onnx
