@@ -4,7 +4,7 @@ const CONTROLLER_CASE_MAP = {
   health: "Health",
   projectofficers: "ProjectOfficers",
   signatories: "Signatories",
-  signatures: "signatures",
+  signatures: "signature",
   template: "Template",
   users: "users",
 };
@@ -107,6 +107,9 @@ export default async function handler(req, res) {
       headers["Content-Type"] =
         req.headers["content-type"];
     }
+    if (req.headers["content-length"]) {
+  headers["Content-Length"] = req.headers["content-length"];
+}
 
     // ============================================================
     // REQUEST OPTIONS
