@@ -621,13 +621,12 @@ const getImageUrl = (path) => {
     );
 
     if (editingItem) {
-      await api.put(`${ENDPOINT}/${editingItem.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await api.put(
+  `${ENDPOINT}/${editingItem.administrativeID}`,
+  formData
+);
     } else {
-      const res = await api.post(ENDPOINT, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await api.post(ENDPOINT, formData);
       savedId = res.data?.id ?? res.data?.ID;
     }
 

@@ -11,6 +11,16 @@ const CONTROLLER_CASE_MAP = {
 
 const BACKEND_URL = "https://id-management-api.runasp.net";
 
+// IMPORTANT:
+// Disable Vercel's automatic body parser.
+// We need to forward the original request stream
+// for multipart/form-data uploads.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req, res) {
   try {
     console.log("=================================");
@@ -21,7 +31,7 @@ export default async function handler(req, res) {
 
     const url = new URL(req.url, `https://${req.headers.host}`);
 
-    // Remove /api/ from the beginning
+    // Remove /api/ from beginning
     let targetPath = url.pathname.replace(/^\/api\/?/, "");
 
     const queryString = url.search;
@@ -43,7 +53,6 @@ export default async function handler(req, res) {
     let backendUrl;
 
     if (isUploadsPath) {
-      // Remove "uploads/" and rebuild it cleanly
       const uploadPath = targetPath
         .replace(/^uploads\/?/i, "")
         .replace(/^\/+/, "")
@@ -58,12 +67,6 @@ export default async function handler(req, res) {
 
     // ============================================================
     // NORMAL API REQUESTS
-    // /api/users
-    // /api/Template
-    // /api/ProjectOfficers
-    //
-    // becomes:
-    // https://id-management-api.runasp.net/api/users
     // ============================================================
 
     else {
@@ -97,6 +100,9 @@ export default async function handler(req, res) {
         req.headers.authorization;
     }
 
+    // IMPORTANT:
+    // Keep the original Content-Type INCLUDING
+    // the multipart boundary.
     if (req.headers["content-type"]) {
       headers["Content-Type"] =
         req.headers["content-type"];
@@ -111,20 +117,35 @@ export default async function handler(req, res) {
       headers,
     };
 
-    // Forward request body for POST / PUT / PATCH
-    if (
-      !["GET", "HEAD"].includes(req.method) &&
-      req.body != null
-    ) {
-      options.body =
-        typeof req.body === "string"
-          ? req.body
-          : JSON.stringify(req.body);
+    // ============================================================
+    // FORWARD ORIGINAL REQUEST BODY
+    // ============================================================
+    //
+    // DO NOT use JSON.stringify(req.body).
+    //
+    // This is what allows:
+    //
+    // FormData
+    //   ↓
+    // Vercel
+    //   ↓
+    // ASP.NET Core
+    //
+    // to preserve uploaded files.
+    //
+
+    if (!["GET", "HEAD"].includes(req.method)) {
+      options.body = req;
     }
 
     // ============================================================
     // CALL BACKEND
     // ============================================================
+
+    console.log(
+      "Sending request to:",
+      backendUrl
+    );
 
     const response =
       await fetch(backendUrl, options);

@@ -269,13 +269,12 @@ const getImageUrl = (path) => {
         formData.append("BackgroundColor", form.backgroundColor);
 
       if (editingItem) {
-        await api.put(`${ENDPOINT}/${editingItem.administrativeID}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.put(
+  `${ENDPOINT}/${editingItem.administrativeID}`,
+  formData
+);
       } else {
-        await api.post(ENDPOINT, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post(ENDPOINT, formData);
       }
 
       await loadAdministratives();
