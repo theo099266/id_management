@@ -11,14 +11,18 @@ export default async function handler(req, res) {
       `https://${req.headers.host}`
     );
 
+    // /api/uploads/profiles/file.jpg
+    //          ↓
+    // profiles/file.jpg
     const targetPath = url.pathname.replace(
-      /^\/api\/uploads\/?/,
+      /^\/api\/uploads\/?/i,
       ""
     );
 
     const backendUrl =
       `https://id-management-api.runasp.net/uploads/${targetPath}${url.search}`;
 
+    console.log("Target path:", targetPath);
     console.log("Backend:", backendUrl);
 
     const headers = {};
@@ -36,6 +40,7 @@ export default async function handler(req, res) {
       headers,
     };
 
+    // Forward body for POST / PUT / PATCH
     if (!["GET", "HEAD"].includes(req.method)) {
       if (req.body !== undefined && req.body !== null) {
         options.body =
@@ -44,6 +49,8 @@ export default async function handler(req, res) {
             : JSON.stringify(req.body);
       }
     }
+
+    console.log("Sending request to backend...");
 
     const response = await fetch(
       backendUrl,
@@ -65,6 +72,7 @@ export default async function handler(req, res) {
       );
     }
 
+    // Image / PDF / binary file
     if (
       contentType &&
       (
@@ -82,6 +90,7 @@ export default async function handler(req, res) {
         .send(buffer);
     }
 
+    // JSON / text
     const data = await response.text();
 
     console.log(
@@ -94,7 +103,10 @@ export default async function handler(req, res) {
       .send(data);
 
   } catch (error) {
-    console.error("UPLOAD PROXY ERROR:", error);
+    console.error("=================================");
+    console.error("🔥 UPLOAD PROXY ERROR");
+    console.error(error);
+    console.error("=================================");
 
     return res.status(502).json({
       error: "Upload proxy failed",
