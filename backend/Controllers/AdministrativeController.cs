@@ -1,7 +1,8 @@
 using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OpenCvSharp;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Backend.Controllers
 {
@@ -202,87 +203,23 @@ namespace Backend.Controllers
             if (!System.IO.File.Exists(existingPath))
                 return null;
 
-            var data = await System.IO.File.ReadAllBytesAsync(existingPath);
-            using var mat = Cv2.ImDecode(data, ImreadModes.Unchanged);
-            if (mat.Empty())
-                return null;
+            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+                !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
 
-            if (mat.Channels() == 4 && string.IsNullOrWhiteSpace(bgColorHex))
+            if (!hasColorRequest)
                 return existingRelativePath;
 
-            if (string.IsNullOrWhiteSpace(bgColorHex) || bgColorHex == "undefined")
-                return existingRelativePath;
+            using var image = await Image.LoadAsync<Rgba32>(existingPath);
 
-            using var hsv = new Mat();
-            Cv2.CvtColor(mat, hsv, ColorConversionCodes.BGR2HSV);
-
-            var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex);
-            var targetHue = target.GetHue() / 2.0;
-            var targetSat = target.GetSaturation() * 255;
-            var targetVal = target.GetBrightness() * 255;
-
-            var lower = new Scalar(Math.Max(0, targetHue - 18), Math.Max(0, targetSat - 55), Math.Max(0, targetVal - 70));
-            var upper = new Scalar(Math.Min(179, targetHue + 18), Math.Min(255, targetSat + 55), Math.Min(255, targetVal + 70));
-
-            using var mask = new Mat();
-            Cv2.InRange(hsv, lower, upper, mask);
-
-            if (target.GetSaturation() < 0.12 && target.GetBrightness() > 0.8)
-            {
-                using var gray = new Mat();
-                Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-                using var brightMask = new Mat();
-                Cv2.Threshold(gray, brightMask, 240, 255, ThresholdTypes.Binary);
-
-                if (brightMask.Size() != mask.Size() || brightMask.Type() != mask.Type())
-                {
-                    Cv2.Resize(brightMask, brightMask, mask.Size());
-                    brightMask.ConvertTo(brightMask, mask.Type());
-                }
-
-                Cv2.BitwiseOr(mask, brightMask, mask);
-            }
-            if (target.GetBrightness() < 0.15)
-{
-    using var gray = new Mat();
-    Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-
-    using var darkMask = new Mat();
-
-    // Adjust threshold if needed
-    Cv2.Threshold(gray, darkMask, 40, 255, ThresholdTypes.BinaryInv);
-
-    Cv2.BitwiseOr(mask, darkMask, mask);
-}
-
-            using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
-
-            using var result = new Mat();
-            Cv2.CvtColor(mat, result, ColorConversionCodes.BGR2BGRA);
-
-            int rows = result.Rows;
-            int cols = result.Cols;
-            for (int y = 0; y < rows; y++)
-            {
-                for (int x = 0; x < cols; x++)
-                {
-                    if (mask.At<byte>(y, x) == 255)
-                    {
-                        var pixel = result.At<Vec4b>(y, x);
-                        pixel[3] = 0;
-                        result.Set(y, x, pixel);
-                    }
-                }
-            }
+            RemoveBackgroundColor(image, bgColorHex!);
 
             var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
             Directory.CreateDirectory(uploadsFolder);
             var baseName = Path.GetFileNameWithoutExtension(existingPath);
             var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{baseName}.png";
             var fullPath = Path.Combine(uploadsFolder, safeFileName);
-            Cv2.ImWrite(fullPath, result);
+
+            await image.SaveAsPngAsync(fullPath);
 
             return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
         }
@@ -300,78 +237,74 @@ namespace Backend.Controllers
 
             using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
-            var data = ms.ToArray();
-            using var mat = Cv2.ImDecode(data, ImreadModes.Unchanged);
+            ms.Position = 0;
 
-            if (mat.Empty())
-                return null;
+            using var image = await Image.LoadAsync<Rgba32>(ms);
 
-            if (mat.Channels() == 4)
-            {
-                Cv2.ImWrite(fullPath, mat);
-                return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-            }
+            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+                !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
 
-            if (string.IsNullOrWhiteSpace(bgColorHex) || bgColorHex == "undefined")
-            {
-                Cv2.ImWrite(fullPath, mat);
-                return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-            }
+            if (hasColorRequest)
+                RemoveBackgroundColor(image, bgColorHex!);
 
-            using var hsv = new Mat();
-            Cv2.CvtColor(mat, hsv, ColorConversionCodes.BGR2HSV);
+            await image.SaveAsPngAsync(fullPath);
 
+            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
+        }
+
+        private static void RemoveBackgroundColor(Image<Rgba32> image, string bgColorHex)
+        {
             var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex);
-            var targetHue = target.GetHue() / 2.0;
-            var targetSat = target.GetSaturation() * 255;
-            var targetVal = target.GetBrightness() * 255;
+            var (targetH, targetS, targetV) = RgbToHsv(target.R, target.G, target.B);
 
-            var lower = new Scalar(Math.Max(0, targetHue - 18), Math.Max(0, targetSat - 55), Math.Max(0, targetVal - 70));
-            var upper = new Scalar(Math.Min(179, targetHue + 18), Math.Min(255, targetSat + 55), Math.Min(255, targetVal + 70));
+            bool nearWhite = targetS < 0.12 && targetV > 0.8;
+            bool nearBlack = targetV < 0.15;
 
-            using var mask = new Mat();
-            Cv2.InRange(hsv, lower, upper, mask);
+            const double hueTol = 36;              // OpenCV used ±18 on a 0-179 scale -> ±36 on 0-360
+            const double satTol = 55.0 / 255.0;
+            const double valTol = 70.0 / 255.0;
 
-            if (target.GetSaturation() < 0.12 && target.GetBrightness() > 0.8)
+            image.ProcessPixelRows(accessor =>
             {
-                using var gray = new Mat();
-                Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-                using var brightMask = new Mat();
-                Cv2.Threshold(gray, brightMask, 240, 255, ThresholdTypes.Binary);
-
-                if (brightMask.Size() != mask.Size() || brightMask.Type() != mask.Type())
+                for (int y = 0; y < accessor.Height; y++)
                 {
-                    Cv2.Resize(brightMask, brightMask, mask.Size());
-                    brightMask.ConvertTo(brightMask, mask.Type());
-                }
-
-                Cv2.BitwiseOr(mask, brightMask, mask);
-            }
-
-            using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
-
-            using var result = new Mat();
-            Cv2.CvtColor(mat, result, ColorConversionCodes.BGR2BGRA);
-
-            int rows = result.Rows;
-            int cols = result.Cols;
-            for (int y = 0; y < rows; y++)
-            {
-                for (int x = 0; x < cols; x++)
-                {
-                    if (mask.At<byte>(y, x) == 255)
+                    var row = accessor.GetRowSpan(y);
+                    for (int x = 0; x < row.Length; x++)
                     {
-                        var pixel = result.At<Vec4b>(y, x);
-                        pixel[3] = 0;
-                        result.Set(y, x, pixel);
+                        ref var px = ref row[x];
+                        var (h, s, v) = RgbToHsv(px.R, px.G, px.B);
+
+                        double hueDiff = Math.Min(Math.Abs(h - targetH), 360 - Math.Abs(h - targetH));
+                        bool matches = hueDiff <= hueTol
+                            && Math.Abs(s - targetS) <= satTol
+                            && Math.Abs(v - targetV) <= valTol;
+
+                        if (!matches && nearWhite) matches = v > 240.0 / 255.0;
+                        if (!matches && nearBlack) matches = v < 40.0 / 255.0;
+
+                        if (matches) px.A = 0;
                     }
                 }
-            }
+            });
+        }
 
-            Cv2.ImWrite(fullPath, result);
-            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
+        private static (double H, double S, double V) RgbToHsv(byte r, byte g, byte b)
+        {
+            double rd = r / 255.0, gd = g / 255.0, bd = b / 255.0;
+            double max = Math.Max(rd, Math.Max(gd, bd));
+            double min = Math.Min(rd, Math.Min(gd, bd));
+            double delta = max - min;
+
+            double h = 0;
+            if (delta > 0.00001)
+            {
+                if (max == rd) h = 60 * (((gd - bd) / delta) % 6);
+                else if (max == gd) h = 60 * (((bd - rd) / delta) + 2);
+                else h = 60 * (((rd - gd) / delta) + 4);
+            }
+            if (h < 0) h += 360;
+
+            return (h, max <= 0 ? 0 : delta / max, max);
         }
     }
 

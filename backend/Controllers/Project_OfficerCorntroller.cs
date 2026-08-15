@@ -2,9 +2,10 @@ using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OpenCvSharp;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims; 
+using System.Security.Claims;
 
 namespace Backend.Controllers
 {
@@ -108,27 +109,27 @@ namespace Backend.Controllers
                         t.TemplateID == request.TemplateID.Value);
             }
 
-                // Employee automatically uses their assigned Office Type
-                /*var officeType = user.OfficeType?.Trim();
+            // Employee automatically uses their assigned Office Type
+            /*var officeType = user.OfficeType?.Trim();
 
-                if (string.IsNullOrWhiteSpace(officeType))
-                {
-                    return BadRequest(
-                        "Your account does not have an Office Type assigned."
-                    );
-                }
-
-                template = await _context.Templates
-                    .FirstOrDefaultAsync(t =>
-                        t.Name != null &&
-                        t.Name.Trim().ToLower() == officeType.ToLower());
+            if (string.IsNullOrWhiteSpace(officeType))
+            {
+                return BadRequest(
+                    "Your account does not have an Office Type assigned."
+                );
             }
 
-            if (template == null)
-            {
-                return BadRequest("Template could not be found.");
-            }*/
-                        
+            template = await _context.Templates
+                .FirstOrDefaultAsync(t =>
+                    t.Name != null &&
+                    t.Name.Trim().ToLower() == officeType.ToLower());
+        }
+
+        if (template == null)
+        {
+            return BadRequest("Template could not be found.");
+        }*/
+
 
             var officer = new Project_Officers
             {
@@ -203,21 +204,68 @@ namespace Backend.Controllers
                         System.IO.File.Delete(oldImgPath);
                 }
 
-                 officer.ImagePath = await SavePlainImageAsync(request.Image, "profiles");
+                officer.ImagePath = await SavePlainImageAsync(request.Image, "profiles");
             }
-           
+
 
 
             if (request.Signature != null && request.Signature.Length > 0)
             {
-                if (!string.IsNullOrEmpty(officer.Signaturepath))
+                try
                 {
-                    var oldSigPath = Path.Combine(_env.ContentRootPath, officer.Signaturepath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                    if (System.IO.File.Exists(oldSigPath))
-                        System.IO.File.Delete(oldSigPath);
-                }
+                    Console.WriteLine("=================================");
+                    Console.WriteLine("SIGNATURE UPLOAD START");
+                    Console.WriteLine($"File: {request.Signature.FileName}");
+                    Console.WriteLine($"Length: {request.Signature.Length}");
+                    Console.WriteLine($"ContentType: {request.Signature.ContentType}");
+                    Console.WriteLine($"BackgroundColor: {request.BackgroundColor}");
+                    Console.WriteLine("=================================");
 
-                officer.Signaturepath = await SaveAndRemoveBackgroundAsync(request.Signature, "signatures", request.BackgroundColor);
+                    if (!string.IsNullOrEmpty(officer.Signaturepath))
+                    {
+                        var oldSigPath = Path.Combine(
+                            _env.ContentRootPath,
+                            officer.Signaturepath.Replace(
+                                "/",
+                                Path.DirectorySeparatorChar.ToString()
+                            )
+                        );
+
+                        if (System.IO.File.Exists(oldSigPath))
+                        {
+                            System.IO.File.Delete(oldSigPath);
+                        }
+                    }
+
+                    var newSignaturePath =
+                        await SaveAndRemoveBackgroundAsync(
+                            request.Signature,
+                            "signatures",
+                            request.BackgroundColor
+                        );
+
+                    if (string.IsNullOrEmpty(newSignaturePath))
+                    {
+                        return StatusCode(500, "Signature image could not be processed.");
+                    }
+
+                    officer.Signaturepath = newSignaturePath;
+
+                    Console.WriteLine($"SIGNATURE SAVED: {newSignaturePath}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("=================================");
+                    Console.WriteLine("SIGNATURE UPLOAD ERROR");
+                    Console.WriteLine(ex.ToString());
+                    Console.WriteLine("=================================");
+
+                    return StatusCode(500, new
+                    {
+                        message = "Signature upload failed.",
+                        error = ex.Message
+                    });
+                }
             }
             else if (!string.IsNullOrWhiteSpace(request.BackgroundColor) && !string.IsNullOrEmpty(officer.Signaturepath))
             {
@@ -364,205 +412,119 @@ namespace Backend.Controllers
 
             return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
         }
-        private async Task<string?> ReprocessExistingImageAsync(string existingRelativePath, string folderName, string? bgColorHex)
-        {
-            if (string.IsNullOrEmpty(existingRelativePath))
-                return null;
-
-            var existingPath = Path.Combine(_env.ContentRootPath, existingRelativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-            if (!System.IO.File.Exists(existingPath))
-                return null;
-
-            var data = await System.IO.File.ReadAllBytesAsync(existingPath);
-            using var mat = Cv2.ImDecode(data, ImreadModes.Unchanged);
-            if (mat.Empty())
-                return null;
-
-            if (mat.Channels() == 1)
-            {
-                Cv2.CvtColor(mat, mat, ColorConversionCodes.GRAY2BGR);
-            }
-
-            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) && bgColorHex != "undefined";
-
-            if (!hasColorRequest)
-                return existingRelativePath;
-
-            if (mat.Channels() == 4)
-            {
-                Cv2.CvtColor(mat, mat, ColorConversionCodes.BGRA2BGR);
-            }
-
-            using var hsv = new Mat();
-            Cv2.CvtColor(mat, hsv, ColorConversionCodes.BGR2HSV);
-
-            var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex!);
-            var targetHue = target.GetHue() / 2.0;
-            var targetSat = target.GetSaturation() * 255;
-            var targetVal = target.GetBrightness() * 255;
-
-            var lower = new Scalar(Math.Max(0, targetHue - 18), Math.Max(0, targetSat - 55), Math.Max(0, targetVal - 70));
-            var upper = new Scalar(Math.Min(179, targetHue + 18), Math.Min(255, targetSat + 55), Math.Min(255, targetVal + 70));
-
-            using var mask = new Mat();
-            Cv2.InRange(hsv, lower, upper, mask);
-
-            if (target.GetSaturation() < 0.12 && target.GetBrightness() > 0.8)
-            {
-                using var gray = new Mat();
-                Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-                using var brightMask = new Mat();
-                Cv2.Threshold(gray, brightMask, 240, 255, ThresholdTypes.Binary);
-
-                if (brightMask.Size() != mask.Size() || brightMask.Type() != mask.Type())
-                {
-                    Cv2.Resize(brightMask, brightMask, mask.Size());
-                    brightMask.ConvertTo(brightMask, mask.Type());
-                }
-
-                Cv2.BitwiseOr(mask, brightMask, mask);
-            }
-            if (target.GetBrightness() < 0.15)
-            {
-                using var gray = new Mat();
-                Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-
-                using var darkMask = new Mat();
-                Cv2.Threshold(gray, darkMask, 40, 255, ThresholdTypes.BinaryInv);
-
-                if (darkMask.Size() != mask.Size() || darkMask.Type() != mask.Type())
-                {
-                    Cv2.Resize(darkMask, darkMask, mask.Size());
-                    darkMask.ConvertTo(darkMask, mask.Type());
-                }
-
-                Cv2.BitwiseOr(mask, darkMask, mask);
-            }
-
-            using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
-
-            using var result = new Mat();
-            Cv2.CvtColor(mat, result, ColorConversionCodes.BGR2BGRA);
-
-            int rows = result.Rows;
-            int cols = result.Cols;
-            for (int y = 0; y < rows; y++)
-            {
-                for (int x = 0; x < cols; x++)
-                {
-                    if (mask.At<byte>(y, x) == 255)
-                    {
-                        var pixel = result.At<Vec4b>(y, x);
-                        pixel[3] = 0;
-                        result.Set(y, x, pixel);
-                    }
-                }
-            }
-
-            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
-            Directory.CreateDirectory(uploadsFolder);
-            var baseName = Path.GetFileNameWithoutExtension(existingPath);
-            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{baseName}.png";
-            var fullPath = Path.Combine(uploadsFolder, safeFileName);
-            Cv2.ImWrite(fullPath, result);
-
-            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-        }
-
         private async Task<string?> SaveAndRemoveBackgroundAsync(IFormFile? file, string folderName, string? bgColorHex = null)
+{
+    if (file == null || file.Length == 0)
+        return null;
+
+    var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
+    Directory.CreateDirectory(uploadsFolder);
+
+    var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileNameWithoutExtension(file.FileName)}.png";
+    var fullPath = Path.Combine(uploadsFolder, safeFileName);
+
+    using var ms = new MemoryStream();
+    await file.CopyToAsync(ms);
+    ms.Position = 0;
+
+    using var image = await Image.LoadAsync<Rgba32>(ms);
+
+    bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+        !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
+
+    if (hasColorRequest)
+        RemoveBackgroundColor(image, bgColorHex!);
+
+    await image.SaveAsPngAsync(fullPath);
+
+    return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
+}
+
+
+private async Task<string?> ReprocessExistingImageAsync(string existingRelativePath, string folderName, string? bgColorHex)
+{
+    if (string.IsNullOrEmpty(existingRelativePath))
+        return null;
+
+    var existingPath = Path.Combine(_env.ContentRootPath, existingRelativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+    if (!System.IO.File.Exists(existingPath))
+        return null;
+
+    bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+        !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
+
+    if (!hasColorRequest)
+        return existingRelativePath;
+
+    using var image = await Image.LoadAsync<Rgba32>(existingPath);
+
+    RemoveBackgroundColor(image, bgColorHex!);
+
+    var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
+    Directory.CreateDirectory(uploadsFolder);
+    var baseName = Path.GetFileNameWithoutExtension(existingPath);
+    var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{baseName}.png";
+    var fullPath = Path.Combine(uploadsFolder, safeFileName);
+
+    await image.SaveAsPngAsync(fullPath);
+
+    return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
+}
+
+private static void RemoveBackgroundColor(Image<Rgba32> image, string bgColorHex)
+{
+    var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex);
+    var (targetH, targetS, targetV) = RgbToHsv(target.R, target.G, target.B);
+
+    bool nearWhite = targetS < 0.12 && targetV > 0.8;
+    bool nearBlack = targetV < 0.15;
+
+    const double hueTol = 36;              // OpenCV used ±18 on a 0-179 scale -> ±36 on 0-360
+    const double satTol = 55.0 / 255.0;
+    const double valTol = 70.0 / 255.0;
+
+    image.ProcessPixelRows(accessor =>
+    {
+        for (int y = 0; y < accessor.Height; y++)
         {
-            if (file == null || file.Length == 0)
-                return null;
-
-            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
-            Directory.CreateDirectory(uploadsFolder);
-
-            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileNameWithoutExtension(file.FileName)}.png";
-            var fullPath = Path.Combine(uploadsFolder, safeFileName);
-
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            var data = ms.ToArray();
-            using var mat = Cv2.ImDecode(data, ImreadModes.Unchanged);
-
-            if (mat.Empty())
-                return null;
-
-            if (mat.Channels() == 1)
+            var row = accessor.GetRowSpan(y);
+            for (int x = 0; x < row.Length; x++)
             {
-                Cv2.CvtColor(mat, mat, ColorConversionCodes.GRAY2BGR);
+                ref var px = ref row[x];
+                var (h, s, v) = RgbToHsv(px.R, px.G, px.B);
+
+                double hueDiff = Math.Min(Math.Abs(h - targetH), 360 - Math.Abs(h - targetH));
+                bool matches = hueDiff <= hueTol
+                    && Math.Abs(s - targetS) <= satTol
+                    && Math.Abs(v - targetV) <= valTol;
+
+                if (!matches && nearWhite) matches = v > 240.0 / 255.0;
+                if (!matches && nearBlack) matches = v < 40.0 / 255.0;
+
+                if (matches) px.A = 0;
             }
-
-            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) && bgColorHex != "undefined";
-
-            if (!hasColorRequest)
-            {
-                Cv2.ImWrite(fullPath, mat);
-                return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-            }
-
-            if (mat.Channels() == 4)
-            {
-                Cv2.CvtColor(mat, mat, ColorConversionCodes.BGRA2BGR);
-            }
-
-            using var hsv = new Mat();
-            Cv2.CvtColor(mat, hsv, ColorConversionCodes.BGR2HSV);
-
-            var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex!);
-            var targetHue = target.GetHue() / 2.0;
-            var targetSat = target.GetSaturation() * 255;
-            var targetVal = target.GetBrightness() * 255;
-
-            var lower = new Scalar(Math.Max(0, targetHue - 18), Math.Max(0, targetSat - 55), Math.Max(0, targetVal - 70));
-            var upper = new Scalar(Math.Min(179, targetHue + 18), Math.Min(255, targetSat + 55), Math.Min(255, targetVal + 70));
-
-            using var mask = new Mat();
-            Cv2.InRange(hsv, lower, upper, mask);
-
-            if (target.GetSaturation() < 0.12 && target.GetBrightness() > 0.8)
-            {
-                using var gray = new Mat();
-                Cv2.CvtColor(mat, gray, ColorConversionCodes.BGR2GRAY);
-                using var brightMask = new Mat();
-                Cv2.Threshold(gray, brightMask, 240, 255, ThresholdTypes.Binary);
-
-                if (brightMask.Size() != mask.Size() || brightMask.Type() != mask.Type())
-                {
-                    Cv2.Resize(brightMask, brightMask, mask.Size());
-                    brightMask.ConvertTo(brightMask, mask.Type());
-                }
-
-                Cv2.BitwiseOr(mask, brightMask, mask);
-            }
-
-            using var kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(3, 3));
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
-            Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
-
-            using var result = new Mat();
-            Cv2.CvtColor(mat, result, ColorConversionCodes.BGR2BGRA);
-
-            int rows = result.Rows;
-            int cols = result.Cols;
-            for (int y = 0; y < rows; y++)
-            {
-                for (int x = 0; x < cols; x++)
-                {
-                    if (mask.At<byte>(y, x) == 255)
-                    {
-                        var pixel = result.At<Vec4b>(y, x);
-                        pixel[3] = 0;
-                        result.Set(y, x, pixel);
-                    }
-                }
-            }
-
-            Cv2.ImWrite(fullPath, result);
-            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
         }
+    });
+}
+
+private static (double H, double S, double V) RgbToHsv(byte r, byte g, byte b)
+{
+    double rd = r / 255.0, gd = g / 255.0, bd = b / 255.0;
+    double max = Math.Max(rd, Math.Max(gd, bd));
+    double min = Math.Min(rd, Math.Min(gd, bd));
+    double delta = max - min;
+
+    double h = 0;
+    if (delta > 0.00001)
+    {
+        if (max == rd) h = 60 * (((gd - bd) / delta) % 6);
+        else if (max == gd) h = 60 * (((bd - rd) / delta) + 2);
+        else h = 60 * (((rd - gd) / delta) + 4);
+    }
+    if (h < 0) h += 360;
+
+    return (h, max <= 0 ? 0 : delta / max, max);
+}
     }
 
     public class ProjectOfficerRequest

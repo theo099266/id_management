@@ -649,6 +649,7 @@ const getImageUrl = (path) => {
 
       if (editingItem) {
     await api.put(`${ENDPOINT}/${editingItem.id}`, formData);
+    savedId = editingItem.id;
   } else {
     const createRes = await api.post(ENDPOINT, formData);
     savedId = createRes.data?.id ?? createRes.data?.ID;
