@@ -123,10 +123,10 @@ const getImageUrl = (path) => {
 };
   // Signatures are normalized server-side on every request — route them
   // through the normalize endpoint instead of the raw uploaded file.
-  const getNormalizedSignatureUrl = (path) => {
-  if (!path) return "";
-  return `/api/signatures/normalized?path=${encodeURIComponent(path)}`;
-};
+    const getNormalizedSignatureUrl = (path) => {
+    if (!path) return "";
+    return `${BACKEND_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
+  };
 
   const employeeData = employee
     ? {
