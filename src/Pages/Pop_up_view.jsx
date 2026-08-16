@@ -278,6 +278,7 @@ const getImageUrl = (path) => {
   { outWidth, outHeight, background = "#ffffff" } = {},
 ) => {
   if (!ref.current) return;
+   if (document.fonts?.ready) await document.fonts.ready;
   const unscaledWidth = ref.current.offsetWidth || ref.current.clientWidth;
   const unscaledHeight = ref.current.offsetHeight || ref.current.clientHeight;
 
@@ -297,6 +298,7 @@ const getImageUrl = (path) => {
     ".employee-photo": { transform: "translateY(0px)" },
     ".employee-signature": { transform: "translateY(4.5px)" },
     ".employee-name": { letterSpacing: "0.8px" },
+    ".name-lines": { letterSpacing: "normal" }, 
     ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
     ".info-column": { transform: "translateY(-6px)" },
   };
