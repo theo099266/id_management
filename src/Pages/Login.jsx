@@ -155,14 +155,6 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Remember */}
-
-        <div className="flex justify-between items-center text-white text-sm mb-6">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" />
-            Remember Me
-          </label>
-        </div>
         <button
           onClick={handleLogin}
           disabled={isLoggingIn}
