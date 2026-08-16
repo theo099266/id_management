@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using YourApp.Services;
-
+using Microsoft.AspNetCore.Authorization;
 namespace YourApp.Controllers
 {
     [ApiController]
     [Route("api/signatures")]
+     [Authorize(Roles = "Administrator")]
     public class SignaturesController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;

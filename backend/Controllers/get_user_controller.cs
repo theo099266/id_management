@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/users")]
+    [Authorize(Roles = "Administrator")]
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

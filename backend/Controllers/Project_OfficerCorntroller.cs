@@ -6,11 +6,11 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-
 namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Administrator")]
     public class ProjectOfficersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -213,13 +213,6 @@ namespace Backend.Controllers
             {
                 try
                 {
-                    Console.WriteLine("=================================");
-                    Console.WriteLine("SIGNATURE UPLOAD START");
-                    Console.WriteLine($"File: {request.Signature.FileName}");
-                    Console.WriteLine($"Length: {request.Signature.Length}");
-                    Console.WriteLine($"ContentType: {request.Signature.ContentType}");
-                    Console.WriteLine($"BackgroundColor: {request.BackgroundColor}");
-                    Console.WriteLine("=================================");
 
                     if (!string.IsNullOrEmpty(officer.Signaturepath))
                     {
@@ -251,15 +244,9 @@ namespace Backend.Controllers
 
                     officer.Signaturepath = newSignaturePath;
 
-                    Console.WriteLine($"SIGNATURE SAVED: {newSignaturePath}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("=================================");
-                    Console.WriteLine("SIGNATURE UPLOAD ERROR");
-                    Console.WriteLine(ex.ToString());
-                    Console.WriteLine("=================================");
-
                     return StatusCode(500, new
                     {
                         message = "Signature upload failed.",
@@ -413,118 +400,118 @@ namespace Backend.Controllers
             return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
         }
         private async Task<string?> SaveAndRemoveBackgroundAsync(IFormFile? file, string folderName, string? bgColorHex = null)
-{
-    if (file == null || file.Length == 0)
-        return null;
-
-    var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
-    Directory.CreateDirectory(uploadsFolder);
-
-    var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileNameWithoutExtension(file.FileName)}.png";
-    var fullPath = Path.Combine(uploadsFolder, safeFileName);
-
-    using var ms = new MemoryStream();
-    await file.CopyToAsync(ms);
-    ms.Position = 0;
-
-    using var image = await Image.LoadAsync<Rgba32>(ms);
-
-    bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
-        !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
-
-    if (hasColorRequest)
-        RemoveBackgroundColor(image, bgColorHex!);
-
-    await image.SaveAsPngAsync(fullPath);
-
-    return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-}
-
-
-private async Task<string?> ReprocessExistingImageAsync(string existingRelativePath, string folderName, string? bgColorHex)
-{
-    if (string.IsNullOrEmpty(existingRelativePath))
-        return null;
-
-    var existingPath = Path.Combine(_env.ContentRootPath, existingRelativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-    if (!System.IO.File.Exists(existingPath))
-        return null;
-
-    bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
-        !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
-
-    if (!hasColorRequest)
-        return existingRelativePath;
-
-    using var image = await Image.LoadAsync<Rgba32>(existingPath);
-
-    RemoveBackgroundColor(image, bgColorHex!);
-
-    var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
-    Directory.CreateDirectory(uploadsFolder);
-    var baseName = Path.GetFileNameWithoutExtension(existingPath);
-    var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{baseName}.png";
-    var fullPath = Path.Combine(uploadsFolder, safeFileName);
-
-    await image.SaveAsPngAsync(fullPath);
-
-    return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
-}
-
-private static void RemoveBackgroundColor(Image<Rgba32> image, string bgColorHex)
-{
-    var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex);
-    var (targetH, targetS, targetV) = RgbToHsv(target.R, target.G, target.B);
-
-    bool nearWhite = targetS < 0.12 && targetV > 0.8;
-    bool nearBlack = targetV < 0.15;
-
-    const double hueTol = 36;              // OpenCV used ±18 on a 0-179 scale -> ±36 on 0-360
-    const double satTol = 55.0 / 255.0;
-    const double valTol = 70.0 / 255.0;
-
-    image.ProcessPixelRows(accessor =>
-    {
-        for (int y = 0; y < accessor.Height; y++)
         {
-            var row = accessor.GetRowSpan(y);
-            for (int x = 0; x < row.Length; x++)
-            {
-                ref var px = ref row[x];
-                var (h, s, v) = RgbToHsv(px.R, px.G, px.B);
+            if (file == null || file.Length == 0)
+                return null;
 
-                double hueDiff = Math.Min(Math.Abs(h - targetH), 360 - Math.Abs(h - targetH));
-                bool matches = hueDiff <= hueTol
-                    && Math.Abs(s - targetS) <= satTol
-                    && Math.Abs(v - targetV) <= valTol;
+            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
+            Directory.CreateDirectory(uploadsFolder);
 
-                if (!matches && nearWhite) matches = v > 240.0 / 255.0;
-                if (!matches && nearBlack) matches = v < 40.0 / 255.0;
+            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Path.GetFileNameWithoutExtension(file.FileName)}.png";
+            var fullPath = Path.Combine(uploadsFolder, safeFileName);
 
-                if (matches) px.A = 0;
-            }
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            ms.Position = 0;
+
+            using var image = await Image.LoadAsync<Rgba32>(ms);
+
+            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+                !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
+
+            if (hasColorRequest)
+                RemoveBackgroundColor(image, bgColorHex!);
+
+            await image.SaveAsPngAsync(fullPath);
+
+            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
         }
-    });
-}
 
-private static (double H, double S, double V) RgbToHsv(byte r, byte g, byte b)
-{
-    double rd = r / 255.0, gd = g / 255.0, bd = b / 255.0;
-    double max = Math.Max(rd, Math.Max(gd, bd));
-    double min = Math.Min(rd, Math.Min(gd, bd));
-    double delta = max - min;
 
-    double h = 0;
-    if (delta > 0.00001)
-    {
-        if (max == rd) h = 60 * (((gd - bd) / delta) % 6);
-        else if (max == gd) h = 60 * (((bd - rd) / delta) + 2);
-        else h = 60 * (((rd - gd) / delta) + 4);
-    }
-    if (h < 0) h += 360;
+        private async Task<string?> ReprocessExistingImageAsync(string existingRelativePath, string folderName, string? bgColorHex)
+        {
+            if (string.IsNullOrEmpty(existingRelativePath))
+                return null;
 
-    return (h, max <= 0 ? 0 : delta / max, max);
-}
+            var existingPath = Path.Combine(_env.ContentRootPath, existingRelativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+            if (!System.IO.File.Exists(existingPath))
+                return null;
+
+            bool hasColorRequest = !string.IsNullOrWhiteSpace(bgColorHex) &&
+                !bgColorHex.Equals("undefined", StringComparison.OrdinalIgnoreCase);
+
+            if (!hasColorRequest)
+                return existingRelativePath;
+
+            using var image = await Image.LoadAsync<Rgba32>(existingPath);
+
+            RemoveBackgroundColor(image, bgColorHex!);
+
+            var uploadsFolder = Path.Combine(_env.ContentRootPath, "uploads", folderName);
+            Directory.CreateDirectory(uploadsFolder);
+            var baseName = Path.GetFileNameWithoutExtension(existingPath);
+            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{baseName}.png";
+            var fullPath = Path.Combine(uploadsFolder, safeFileName);
+
+            await image.SaveAsPngAsync(fullPath);
+
+            return Path.Combine("uploads", folderName, safeFileName).Replace('\\', '/');
+        }
+
+        private static void RemoveBackgroundColor(Image<Rgba32> image, string bgColorHex)
+        {
+            var target = System.Drawing.ColorTranslator.FromHtml(bgColorHex);
+            var (targetH, targetS, targetV) = RgbToHsv(target.R, target.G, target.B);
+
+            bool nearWhite = targetS < 0.12 && targetV > 0.8;
+            bool nearBlack = targetV < 0.15;
+
+            const double hueTol = 36;              // OpenCV used ±18 on a 0-179 scale -> ±36 on 0-360
+            const double satTol = 55.0 / 255.0;
+            const double valTol = 70.0 / 255.0;
+
+            image.ProcessPixelRows(accessor =>
+            {
+                for (int y = 0; y < accessor.Height; y++)
+                {
+                    var row = accessor.GetRowSpan(y);
+                    for (int x = 0; x < row.Length; x++)
+                    {
+                        ref var px = ref row[x];
+                        var (h, s, v) = RgbToHsv(px.R, px.G, px.B);
+
+                        double hueDiff = Math.Min(Math.Abs(h - targetH), 360 - Math.Abs(h - targetH));
+                        bool matches = hueDiff <= hueTol
+                            && Math.Abs(s - targetS) <= satTol
+                            && Math.Abs(v - targetV) <= valTol;
+
+                        if (!matches && nearWhite) matches = v > 240.0 / 255.0;
+                        if (!matches && nearBlack) matches = v < 40.0 / 255.0;
+
+                        if (matches) px.A = 0;
+                    }
+                }
+            });
+        }
+
+        private static (double H, double S, double V) RgbToHsv(byte r, byte g, byte b)
+        {
+            double rd = r / 255.0, gd = g / 255.0, bd = b / 255.0;
+            double max = Math.Max(rd, Math.Max(gd, bd));
+            double min = Math.Min(rd, Math.Min(gd, bd));
+            double delta = max - min;
+
+            double h = 0;
+            if (delta > 0.00001)
+            {
+                if (max == rd) h = 60 * (((gd - bd) / delta) % 6);
+                else if (max == gd) h = 60 * (((bd - rd) / delta) + 2);
+                else h = 60 * (((rd - gd) / delta) + 4);
+            }
+            if (h < 0) h += 360;
+
+            return (h, max <= 0 ? 0 : delta / max, max);
+        }
     }
 
     public class ProjectOfficerRequest
