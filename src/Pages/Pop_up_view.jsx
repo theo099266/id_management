@@ -10,9 +10,14 @@ import { API_BASE_URL } from "../api/axios";
 const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
 
+  const token = localStorage.getItem("token"); // match however your axios.js stores it
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(url, { mode: "cors" });
+      const res = await fetch(url, {
+        mode: "cors",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       return await new Promise((resolve, reject) => {
@@ -27,7 +32,6 @@ const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
         console.error("Failed to convert image to data URL:", url, err);
         return null;
       }
-      // wait a bit before retrying — gives a mid-rebuild server time to come back
       await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
     }
   }
@@ -120,9 +124,9 @@ const getImageUrl = (path) => {
   // Signatures are normalized server-side on every request — route them
   // through the normalize endpoint instead of the raw uploaded file.
   const getNormalizedSignatureUrl = (path) => {
-    if (!path) return "";
-    return `${BACKEND_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
-  };
+  if (!path) return "";
+  return `/api/signatures/normalized?path=${encodeURIComponent(path)}`;
+};
 
   const employeeData = employee
     ? {
