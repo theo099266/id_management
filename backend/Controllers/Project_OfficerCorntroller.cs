@@ -300,20 +300,37 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id}/image")]
+        [Authorize]
         public async Task<IActionResult> DeleteImage(int id)
         {
             var officer = await _context.Project_Officers.FindAsync(id);
-            if (officer == null) return NotFound();
 
-            if (!string.IsNullOrEmpty(officer.ImagePath))
+            if (officer == null)
+                return NotFound(new { message = "Project officer not found." });
+
+            // Get the actual filename/path from the database
+            var imagePath = officer.ImagePath;
+
+            if (!string.IsNullOrWhiteSpace(imagePath))
             {
-                var path = Path.Combine(_env.ContentRootPath, officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
+                // Database value:
+                // uploads/profiles/20260816125110_photo.jpg
 
+                var physicalPath = Path.Combine(
+                    _env.ContentRootPath,
+                    imagePath.Replace("/", Path.DirectorySeparatorChar.ToString())
+                );
+
+                if (System.IO.File.Exists(physicalPath))
+                {
+                    System.IO.File.Delete(physicalPath);
+                }
+
+                // Remove path from database
                 officer.ImagePath = null;
-                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

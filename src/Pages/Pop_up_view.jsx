@@ -7,13 +7,10 @@ import { FaEdit } from "react-icons/fa";
 import { API_BASE_URL } from "../api/axios";
 
 // Converts an image URL to a base64 data URL, sidestepping CORS entirely
-const toDataUrl = async (
-  url,
-  { retries = 2, delayMs = 400, sendAuth = true } = {},
-) => {
+const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
 
-  const token = sendAuth ? localStorage.getItem("token") : null;
+  const token = localStorage.getItem("token"); // match however your axios.js stores it
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -108,25 +105,35 @@ const Pop_up_view = ({ employee, onClose, onEdit }) => {
     validatedSignature: null,
     loading: true,
   });
-  const BACKEND_URL = "https://id-management-api.runasp.net";
+const BACKEND_URL = "https://id-management-api.runasp.net";
 
-  const getImageUrl = (path) => {
-    if (!path) return "";
+const getImageUrl = (path) => {
+  if (!path) return "";
 
-    if (
-      path.startsWith("http://") ||
-      path.startsWith("https://") ||
-      path.startsWith("data:image") ||
-      path.startsWith("blob:")
-    ) {
-      return path;
-    }
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("data:image") ||
+    path.startsWith("blob:")
+  ) {
+    return path;
+  }
 
-    return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
-  };
+  const clean = path.replace(/^\/+/, ""); // strip leading slash if any
+
+  if (clean.startsWith("uploads/templates/")) {
+    // matches FilesController's [HttpGet("templates/{**path}")]
+    const filename = clean.slice("uploads/templates/".length);
+    return `${BACKEND_URL}/api/files/templates/${filename}`;
+  }
+
+  // matches FilesController's [HttpGet("uploads/{**path}")]
+  // (clean already starts with "uploads/" for photos etc.)
+  return `${BACKEND_URL}/api/files/${clean}`;
+};
   // Signatures are normalized server-side on every request — route them
   // through the normalize endpoint instead of the raw uploaded file.
-  const getNormalizedSignatureUrl = (path) => {
+    const getNormalizedSignatureUrl = (path) => {
     if (!path) return "";
     return `${BACKEND_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
   };
@@ -184,9 +191,9 @@ const Pop_up_view = ({ employee, onClose, onEdit }) => {
         rawPhoto ? resizeProfilePhoto(rawPhoto, 600, 900) : null,
         toDataUrl(employeeData.signature),
         toDataUrl(employeeData.validatedSignature),
-        toDataUrl(employeeData.templateFrontBackground, { sendAuth: false }),
-        toDataUrl(employeeData.templateFrontFooter, { sendAuth: false }),
-        toDataUrl(employeeData.templateBackBackground, { sendAuth: false }),
+        toDataUrl(employeeData.templateFrontBackground),
+        toDataUrl(employeeData.templateFrontFooter),
+        toDataUrl(employeeData.templateBackBackground),
       ]);
 
       if (!cancelled) {
@@ -226,156 +233,150 @@ const Pop_up_view = ({ employee, onClose, onEdit }) => {
       employeeData.templateBackBackground,
   };
   const downloadSvgAsJpg = async (
-    svgRef,
-    filename,
-    { outWidth, outHeight, background = "#ffffff" } = {},
-  ) => {
-    const svgEl = svgRef.current;
-    if (!svgEl) return;
+  svgRef,
+  filename,
+  { outWidth, outHeight, background = "#ffffff" } = {},
+) => {
+  const svgEl = svgRef.current;
+  if (!svgEl) return;
 
-    if (document.fonts?.ready) await document.fonts.ready;
+  if (document.fonts?.ready) await document.fonts.ready;
 
-    const viewBox = svgEl.viewBox.baseVal;
-    const vbWidth = viewBox?.width || svgEl.clientWidth;
-    const vbHeight = viewBox?.height || svgEl.clientHeight;
+  const viewBox = svgEl.viewBox.baseVal;
+  const vbWidth = viewBox?.width || svgEl.clientWidth;
+  const vbHeight = viewBox?.height || svgEl.clientHeight;
 
-    const clone = svgEl.cloneNode(true);
-    clone.setAttribute("width", vbWidth);
-    clone.setAttribute("height", vbHeight);
-    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-    await inlineImages(clone);
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute("width", vbWidth);
+  clone.setAttribute("height", vbHeight);
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  await inlineImages(clone);
 
-    const svgString = new XMLSerializer().serializeToString(clone);
-    const svgBlob = new Blob([svgString], {
-      type: "image/svg+xml;charset=utf-8",
-    });
-    const svgUrl = URL.createObjectURL(svgBlob);
+  const svgString = new XMLSerializer().serializeToString(clone);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const svgUrl = URL.createObjectURL(svgBlob);
 
-    try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = svgUrl;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = outWidth;
-      canvas.height = outHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, outWidth, outHeight);
-      ctx.drawImage(img, 0, 0, outWidth, outHeight); // SVG scales cleanly, same ratio → no crop
-
-      const link = document.createElement("a");
-      link.download = filename;
-      link.href = canvas.toDataURL("image/jpeg", 0.95);
-      link.click();
-    } finally {
-      URL.revokeObjectURL(svgUrl);
-    }
-  };
-
-  const downloadHtmlAsJpg = async (
-    ref,
-    filename,
-    { outWidth, outHeight, background = "#ffffff" } = {},
-  ) => {
-    if (!ref.current) return;
-    if (document.fonts?.ready) await document.fonts.ready;
-    const unscaledWidth = ref.current.offsetWidth || ref.current.clientWidth;
-    const unscaledHeight = ref.current.offsetHeight || ref.current.clientHeight;
-
-    const clone = ref.current.cloneNode(true);
-    clone.style.position = "fixed";
-    clone.style.left = "-9999px";
-    clone.style.top = "0";
-    clone.style.margin = "0";
-    clone.style.zIndex = "-1";
-    clone.style.transform = "none";
-    clone.style.width = `${unscaledWidth}px`;
-    clone.style.height = `${unscaledHeight}px`;
-
-    document.body.appendChild(clone);
-
-    const exportStyles = {
-      ".employee-photo": { transform: "translateY(0px)" },
-      ".employee-signature": { transform: "translateY(4.5px)" },
-      ".employee-name": { letterSpacing: "0.8px" },
-      ".name-lines": { letterSpacing: "normal" },
-      ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
-      ".info-column": { transform: "translateY(-6px)" },
-    };
-    Object.entries(exportStyles).forEach(([selector, css]) => {
-      const element = clone.querySelector(selector);
-      if (!element) return;
-      Object.assign(element.style, css);
+  try {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = svgUrl;
     });
 
-    await new Promise((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(resolve)),
-    );
-
-    // render at a high internal scale for crispness, then resample down/up
-    // to the exact target pixel size in a second pass
-    const renderScale = Math.max(
-      outWidth / unscaledWidth,
-      outHeight / unscaledHeight,
-      1,
-    );
-
-    const rawCanvas = await html2canvas(clone, {
-      scale: renderScale,
-      useCORS: true,
-      backgroundColor: background,
-    });
-
-    document.body.removeChild(clone);
-
-    // final canvas locked to the exact card size
-    const finalCanvas = document.createElement("canvas");
-    finalCanvas.width = outWidth;
-    finalCanvas.height = outHeight;
-    const ctx = finalCanvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    canvas.width = outWidth;
+    canvas.height = outHeight;
+    const ctx = canvas.getContext("2d");
     ctx.fillStyle = background;
     ctx.fillRect(0, 0, outWidth, outHeight);
-    ctx.drawImage(rawCanvas, 0, 0, outWidth, outHeight); // same aspect ratio → no crop, no distortion
+    ctx.drawImage(img, 0, 0, outWidth, outHeight); // SVG scales cleanly, same ratio → no crop
 
     const link = document.createElement("a");
     link.download = filename;
-    link.href = finalCanvas.toDataURL("image/jpeg", 0.95);
+    link.href = canvas.toDataURL("image/jpeg", 0.95);
     link.click();
+  } finally {
+    URL.revokeObjectURL(svgUrl);
+  }
+};
+
+  const downloadHtmlAsJpg = async (
+  ref,
+  filename,
+  { outWidth, outHeight, background = "#ffffff" } = {},
+) => {
+  if (!ref.current) return;
+   if (document.fonts?.ready) await document.fonts.ready;
+  const unscaledWidth = ref.current.offsetWidth || ref.current.clientWidth;
+  const unscaledHeight = ref.current.offsetHeight || ref.current.clientHeight;
+
+  const clone = ref.current.cloneNode(true);
+  clone.style.position = "fixed";
+  clone.style.left = "-9999px";
+  clone.style.top = "0";
+  clone.style.margin = "0";
+  clone.style.zIndex = "-1";
+  clone.style.transform = "none";
+  clone.style.width = `${unscaledWidth}px`;
+  clone.style.height = `${unscaledHeight}px`;
+
+  document.body.appendChild(clone);
+
+  const exportStyles = {
+    ".employee-photo": { transform: "translateY(0px)" },
+    ".employee-signature": { transform: "translateY(4.5px)" },
+    ".employee-name": { letterSpacing: "0.8px" },
+    ".name-lines": { letterSpacing: "normal" }, 
+    ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
+    ".info-column": { transform: "translateY(-6px)" },
   };
+  Object.entries(exportStyles).forEach(([selector, css]) => {
+    const element = clone.querySelector(selector);
+    if (!element) return;
+    Object.assign(element.style, css);
+  });
+
+  await new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(resolve)),
+  );
+
+  // render at a high internal scale for crispness, then resample down/up
+  // to the exact target pixel size in a second pass
+  const renderScale = Math.max(outWidth / unscaledWidth, outHeight / unscaledHeight, 1);
+
+  const rawCanvas = await html2canvas(clone, {
+    scale: renderScale,
+    useCORS: true,
+    backgroundColor: background,
+  });
+
+  document.body.removeChild(clone);
+
+  // final canvas locked to the exact card size
+  const finalCanvas = document.createElement("canvas");
+  finalCanvas.width = outWidth;
+  finalCanvas.height = outHeight;
+  const ctx = finalCanvas.getContext("2d");
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, outWidth, outHeight);
+  ctx.drawImage(rawCanvas, 0, 0, outWidth, outHeight); // same aspect ratio → no crop, no distortion
+
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = finalCanvas.toDataURL("image/jpeg", 0.95);
+  link.click();
+};
 
   const handleDownloadFront = (frontRef, finalEmployeeData) =>
-    downloadHtmlAsJpg(
-      frontRef,
-      `${finalEmployeeData.name || "employee"}_front.jpg`,
-      { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) },
-    );
+  downloadHtmlAsJpg(
+    frontRef,
+    `${finalEmployeeData.name || "employee"}_front.jpg`,
+    { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) },
+  );
 
-  const handleDownloadBack = (backRef, finalEmployeeData) =>
-    downloadSvgAsJpg(
-      backRef,
-      `${finalEmployeeData.name || "employee"}_back.jpg`,
-      { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) },
-    );
+const handleDownloadBack = (backRef, finalEmployeeData) =>
+  downloadSvgAsJpg(
+    backRef,
+    `${finalEmployeeData.name || "employee"}_back.jpg`,
+    { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) },
+  );
 
   const handleDownloadBoth = async (frontRef, backRef, finalEmployeeData) => {
-    const dims = { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) };
+  const dims = { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) };
 
-    await downloadHtmlAsJpg(
-      frontRef,
-      `${finalEmployeeData.name || "employee"}_front.jpg`,
-      dims,
-    );
-    await downloadSvgAsJpg(
-      backRef,
-      `${finalEmployeeData.name || "employee"}_back.jpg`,
-      dims,
-    );
-  };
+  await downloadHtmlAsJpg(
+    frontRef,
+    `${finalEmployeeData.name || "employee"}_front.jpg`,
+    dims,
+  );
+  await downloadSvgAsJpg(
+    backRef,
+    `${finalEmployeeData.name || "employee"}_back.jpg`,
+    dims,
+  );
+};
 
   return (
     <div
