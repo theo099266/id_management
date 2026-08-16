@@ -590,17 +590,25 @@ const getImageUrl = (path) => {
   };
 
   const removeImage = async () => {
-    if (editingItem?.id) {
-      try {
-        await api.delete(`${ENDPOINT}/${editingItem.id}/image`);
-        await loadOfficers();
-      } catch (err) {
-        console.error("Failed to remove image", err);
-      }
-    }
-    setForm((prev) => ({ ...prev, image: null }));
+  if (!editingItem?.id) return;
+
+  try {
+    await api.delete(`${ENDPOINT}/${editingItem.id}/image`);
+
+    setForm((prev) => ({
+      ...prev,
+      image: null,
+    }));
+
     setImagePreviewUrl("");
-  };
+
+    await loadOfficers();
+  } catch (err) {
+    console.error("Failed to remove image:", err);
+    console.error("Status:", err.response?.status);
+    console.error("Response:", err.response?.data);
+  }
+};
 
   const removeSignature = async () => {
     if (editingItem?.id) {
