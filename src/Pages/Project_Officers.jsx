@@ -54,6 +54,7 @@ const emptyForm = {
   signature: null,
   backgroundColor: "",
   removeImageBackground: false,
+  removeSignatureImage: false,
    removeImage: false,
   createdBy: null,
 };
@@ -91,6 +92,7 @@ export default function ProjectOfficers() {
       setForm((prev) => ({
         ...prev,
         signature: file,
+         removeSignatureImage: false,
       }));
 
       setSignaturePreviewUrl(url);
@@ -495,7 +497,7 @@ const getImageUrl = (path) => {
       handleImageFile(file);
     } else {
       const url = URL.createObjectURL(file);
-      setForm((prev) => ({ ...prev, signature: file }));
+       setForm((prev) => ({ ...prev, signature: file, removeSignatureImage: false }));
       setSignaturePreviewUrl(url);
     }
   };
@@ -693,6 +695,20 @@ const handleExportZip = async () => {
     setForm((prev) => ({ ...prev, signature: null, backgroundColor: "" }));
     setSignaturePreviewUrl("");
   };
+  const handleRemoveSignature = () => {
+  if (signaturePreviewUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(signaturePreviewUrl);
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    signature: null,
+    backgroundColor: "",
+    removeSignatureImage: true,
+  }));
+
+  setSignaturePreviewUrl("");
+};
 
   const performSave = async () => {
     let savedId;
@@ -720,6 +736,7 @@ const handleExportZip = async () => {
     if (form.removeImage) formData.append("RemoveImage", "true");
 
     if (form.signature) formData.append("Signature", form.signature);
+    if (form.removeSignatureImage) formData.append("RemoveSignatureImage", "true");  
     if (form.backgroundColor)
       formData.append("BackgroundColor", form.backgroundColor);
     formData.append(
@@ -839,13 +856,6 @@ const handleExportZip = async () => {
     </p>
   </div>
   <div className="flex gap-3">
-    <button
-      onClick={handleRenameAllImages}
-      disabled={isRenaming}
-      className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 disabled:opacity-60"
-    >
-      {isRenaming ? "Renaming..." : "Rename All Images"}
-    </button>
     <button
       onClick={handleExportZip}
       disabled={isExporting}
@@ -1582,7 +1592,7 @@ const handleExportZip = async () => {
                       </div>
                       <button
                         type="button"
-                        onClick={removeSignature}
+                         onClick={handleRemoveSignature}
                         className="mt-3 w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-800 text-sm border rounded-lg py-2"
                       >
                         <FaTrash size={12} /> Remove signature

@@ -162,7 +162,7 @@ namespace Backend.Controllers
     request.Name!
 ),
 
-Signaturepath = await SaveAndRemoveBackgroundAsync(
+                Signaturepath = await SaveAndRemoveBackgroundAsync(
     request.Signature,
     "signatures",
     request.BackgroundColor,
@@ -201,68 +201,84 @@ Signaturepath = await SaveAndRemoveBackgroundAsync(
             officer.TemplateID = request.TemplateID ?? officer.TemplateID;
 
             if (request.RemoveImage)
-{
-    if (!string.IsNullOrWhiteSpace(officer.ImagePath))
-    {
-        var oldImagePath = Path.Combine(
-            _env.ContentRootPath,
-            officer.ImagePath.Replace(
-                "/",
-                Path.DirectorySeparatorChar.ToString()
-            )
-        );
+            {
+                if (!string.IsNullOrWhiteSpace(officer.ImagePath))
+                {
+                    var oldImagePath = Path.Combine(
+                        _env.ContentRootPath,
+                        officer.ImagePath.Replace(
+                            "/",
+                            Path.DirectorySeparatorChar.ToString()
+                        )
+                    );
 
-        if (System.IO.File.Exists(oldImagePath))
-        {
-            System.IO.File.Delete(oldImagePath);
-        }
-    }
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
 
-    // Clear database column
-    officer.ImagePath = null;
-}
+                // Clear database column
+                officer.ImagePath = null;
+            }
 
-// CASE 2: User selected a NEW image
-else if (request.Image != null && request.Image.Length > 0)
-{
-    var oldImagePath = officer.ImagePath;
+            // CASE 2: User selected a NEW image
+            else if (request.Image != null && request.Image.Length > 0)
+            {
+                var oldImagePath = officer.ImagePath;
 
-    // Save the NEW image first
-    var newImagePath = await SavePlainImageAsync(
-        request.Image,
-        "profiles",
-        officer.Name
-    );
+                // Save the NEW image first
+                var newImagePath = await SavePlainImageAsync(
+                    request.Image,
+                    "profiles",
+                    officer.Name
+                );
 
-    if (string.IsNullOrWhiteSpace(newImagePath))
-    {
-        return StatusCode(500, "Image could not be saved.");
-    }
+                if (string.IsNullOrWhiteSpace(newImagePath))
+                {
+                    return StatusCode(500, "Image could not be saved.");
+                }
 
-    // Update database to new image
-    officer.ImagePath = newImagePath;
+                // Update database to new image
+                officer.ImagePath = newImagePath;
 
-    // Delete OLD image AFTER the new one was successfully saved
-    if (!string.IsNullOrWhiteSpace(oldImagePath))
-    {
-        var oldFullPath = Path.Combine(
-            _env.ContentRootPath,
-            oldImagePath.Replace(
-                "/",
-                Path.DirectorySeparatorChar.ToString()
-            )
-        );
+                // Delete OLD image AFTER the new one was successfully saved
+                if (!string.IsNullOrWhiteSpace(oldImagePath))
+                {
+                    var oldFullPath = Path.Combine(
+                        _env.ContentRootPath,
+                        oldImagePath.Replace(
+                            "/",
+                            Path.DirectorySeparatorChar.ToString()
+                        )
+                    );
 
-        if (System.IO.File.Exists(oldFullPath))
-        {
-            System.IO.File.Delete(oldFullPath);
-        }
-    }
-}
+                    if (System.IO.File.Exists(oldFullPath))
+                    {
+                        System.IO.File.Delete(oldFullPath);
+                    }
+                }
+            }
 
 
+            if (request.RemoveSignatureImage)
+            {
+                if (!string.IsNullOrEmpty(officer.Signaturepath))
+                {
+                    var oldSigPath = Path.Combine(
+                        _env.ContentRootPath,
+                        officer.Signaturepath.Replace("/", Path.DirectorySeparatorChar.ToString())
+                    );
 
-            if (request.Signature != null && request.Signature.Length > 0)
+                    if (System.IO.File.Exists(oldSigPath))
+                    {
+                        System.IO.File.Delete(oldSigPath);
+                    }
+                }
+
+                officer.Signaturepath = null;
+            }
+            else if (request.Signature != null && request.Signature.Length > 0)
             {
                 try
                 {
@@ -353,60 +369,60 @@ else if (request.Image != null && request.Image.Length > 0)
             return NoContent();
         }
 
-       
+
 
         [HttpDelete("{id}/image")]
-public async Task<IActionResult> DeleteImage(int id)
-{
-    Console.WriteLine($"[DeleteImage] Called with id={id}");
-
-    var officer = await _context.Project_Officers.FindAsync(id);
-    if (officer == null)
-    {
-        Console.WriteLine($"[DeleteImage] Officer with id={id} not found.");
-        return NotFound();
-    }
-
-    Console.WriteLine($"[DeleteImage] Current ImagePath='{officer.ImagePath}'");
-
-    if (!string.IsNullOrEmpty(officer.ImagePath))
-    {
-        var path = Path.Combine(
-            _env.ContentRootPath,
-            officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString())
-        );
-
-        Console.WriteLine($"[DeleteImage] Resolved file path='{path}'");
-
-        if (System.IO.File.Exists(path))
+        public async Task<IActionResult> DeleteImage(int id)
         {
-            try
-            {
-                System.IO.File.Delete(path);
-                Console.WriteLine("[DeleteImage] File deleted from disk.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[DeleteImage] Failed to delete file: {ex.Message}");
-                return StatusCode(500, new { message = "Failed to delete image file.", error = ex.Message });
-            }
-        }
-        else
-        {
-            Console.WriteLine("[DeleteImage] File does not exist on disk, skipping delete.");
-        }
+            Console.WriteLine($"[DeleteImage] Called with id={id}");
 
-        officer.ImagePath = null;
-        await _context.SaveChangesAsync();
-        Console.WriteLine("[DeleteImage] ImagePath cleared and saved.");
-    }
-    else
-    {
-        Console.WriteLine("[DeleteImage] ImagePath was already null/empty, nothing to do.");
-    }
+            var officer = await _context.Project_Officers.FindAsync(id);
+            if (officer == null)
+            {
+                Console.WriteLine($"[DeleteImage] Officer with id={id} not found.");
+                return NotFound();
+            }
 
-    return NoContent();
-}
+            Console.WriteLine($"[DeleteImage] Current ImagePath='{officer.ImagePath}'");
+
+            if (!string.IsNullOrEmpty(officer.ImagePath))
+            {
+                var path = Path.Combine(
+                    _env.ContentRootPath,
+                    officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString())
+                );
+
+                Console.WriteLine($"[DeleteImage] Resolved file path='{path}'");
+
+                if (System.IO.File.Exists(path))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(path);
+                        Console.WriteLine("[DeleteImage] File deleted from disk.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[DeleteImage] Failed to delete file: {ex.Message}");
+                        return StatusCode(500, new { message = "Failed to delete image file.", error = ex.Message });
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("[DeleteImage] File does not exist on disk, skipping delete.");
+                }
+
+                officer.ImagePath = null;
+                await _context.SaveChangesAsync();
+                Console.WriteLine("[DeleteImage] ImagePath cleared and saved.");
+            }
+            else
+            {
+                Console.WriteLine("[DeleteImage] ImagePath was already null/empty, nothing to do.");
+            }
+
+            return NoContent();
+        }
 
 
         [HttpGet("byUser/{userId}")]
@@ -434,184 +450,184 @@ public async Task<IActionResult> DeleteImage(int id)
             return Ok(data);
         }
         private static string SanitizeFileName(string name)
-{
-    if (string.IsNullOrWhiteSpace(name))
-        return "Unknown";
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Unknown";
 
-    var invalidChars = Path.GetInvalidFileNameChars();
+            var invalidChars = Path.GetInvalidFileNameChars();
 
-    var cleaned = new string(
-        name.Trim()
-            .Select(c => invalidChars.Contains(c) ? '_' : c)
-            .ToArray()
-    );
+            var cleaned = new string(
+                name.Trim()
+                    .Select(c => invalidChars.Contains(c) ? '_' : c)
+                    .ToArray()
+            );
 
-    cleaned = System.Text.RegularExpressions.Regex.Replace(
-        cleaned,
-        @"\s+",
-        "_"
-    );
+            cleaned = System.Text.RegularExpressions.Regex.Replace(
+                cleaned,
+                @"\s+",
+                "_"
+            );
 
-    return cleaned;
-}
+            return cleaned;
+        }
         [HttpPost("rename-all-images")]
-public async Task<IActionResult> RenameAllImages()
-{
-    var officers = await _context.Project_Officers
-        .ToListAsync();
-
-    int profileCount = 0;
-    int signatureCount = 0;
-
-    var date = DateTime.Now.ToString("yyyyMMdd");
-
-    foreach (var officer in officers)
-    {
-        if (string.IsNullOrWhiteSpace(officer.Name))
-            continue;
-
-        var safeName = SanitizeFileName(officer.Name);
-
-        // =========================
-        // PROFILE IMAGE
-        // =========================
-        if (!string.IsNullOrWhiteSpace(officer.ImagePath))
+        public async Task<IActionResult> RenameAllImages()
         {
-            var oldImagePath = Path.Combine(
-                _env.ContentRootPath,
-                officer.ImagePath.Replace(
-                    "/",
-                    Path.DirectorySeparatorChar.ToString()
-                )
-            );
+            var officers = await _context.Project_Officers
+                .ToListAsync();
 
-            if (System.IO.File.Exists(oldImagePath))
+            int profileCount = 0;
+            int signatureCount = 0;
+
+            var date = DateTime.Now.ToString("yyyyMMdd");
+
+            foreach (var officer in officers)
             {
-                var extension = Path.GetExtension(oldImagePath);
+                if (string.IsNullOrWhiteSpace(officer.Name))
+                    continue;
 
-                if (string.IsNullOrWhiteSpace(extension))
-                    extension = ".png";
+                var safeName = SanitizeFileName(officer.Name);
 
-                var newFileName =
-                    $"{date}_{safeName}_profile{extension}";
-
-                var newFullPath = Path.Combine(
-                    _env.ContentRootPath,
-                    "uploads",
-                    "profiles",
-                    newFileName
-                );
-
-                // Don't overwrite another existing file
-                if (System.IO.File.Exists(newFullPath) &&
-                    !oldImagePath.Equals(
-                        newFullPath,
-                        StringComparison.OrdinalIgnoreCase))
+                // =========================
+                // PROFILE IMAGE
+                // =========================
+                if (!string.IsNullOrWhiteSpace(officer.ImagePath))
                 {
-                    newFileName =
-                        $"{date}_{safeName}_profile_{Guid.NewGuid():N}{extension}";
-
-                    newFullPath = Path.Combine(
+                    var oldImagePath = Path.Combine(
                         _env.ContentRootPath,
-                        "uploads",
-                        "profiles",
-                        newFileName
+                        officer.ImagePath.Replace(
+                            "/",
+                            Path.DirectorySeparatorChar.ToString()
+                        )
                     );
+
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        var extension = Path.GetExtension(oldImagePath);
+
+                        if (string.IsNullOrWhiteSpace(extension))
+                            extension = ".png";
+
+                        var newFileName =
+                            $"{date}_{safeName}_profile{extension}";
+
+                        var newFullPath = Path.Combine(
+                            _env.ContentRootPath,
+                            "uploads",
+                            "profiles",
+                            newFileName
+                        );
+
+                        // Don't overwrite another existing file
+                        if (System.IO.File.Exists(newFullPath) &&
+                            !oldImagePath.Equals(
+                                newFullPath,
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            newFileName =
+                                $"{date}_{safeName}_profile_{Guid.NewGuid():N}{extension}";
+
+                            newFullPath = Path.Combine(
+                                _env.ContentRootPath,
+                                "uploads",
+                                "profiles",
+                                newFileName
+                            );
+                        }
+
+                        if (!oldImagePath.Equals(
+                            newFullPath,
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.IO.File.Move(
+                                oldImagePath,
+                                newFullPath
+                            );
+                        }
+
+                        officer.ImagePath = Path.Combine(
+                            "uploads",
+                            "profiles",
+                            newFileName
+                        ).Replace('\\', '/');
+
+                        profileCount++;
+                    }
                 }
 
-                if (!oldImagePath.Equals(
-                    newFullPath,
-                    StringComparison.OrdinalIgnoreCase))
+                // =========================
+                // SIGNATURE
+                // =========================
+                if (!string.IsNullOrWhiteSpace(officer.Signaturepath))
                 {
-                    System.IO.File.Move(
-                        oldImagePath,
-                        newFullPath
+                    var oldSignaturePath = Path.Combine(
+                        _env.ContentRootPath,
+                        officer.Signaturepath.Replace(
+                            "/",
+                            Path.DirectorySeparatorChar.ToString()
+                        )
                     );
+
+                    if (System.IO.File.Exists(oldSignaturePath))
+                    {
+                        var newFileName =
+                            $"{date}_{safeName}_signature.png";
+
+                        var newFullPath = Path.Combine(
+                            _env.ContentRootPath,
+                            "uploads",
+                            "signatures",
+                            newFileName
+                        );
+
+                        // Don't overwrite another existing file
+                        if (System.IO.File.Exists(newFullPath) &&
+                            !oldSignaturePath.Equals(
+                                newFullPath,
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            newFileName =
+                                $"{date}_{safeName}_signature_{Guid.NewGuid():N}.png";
+
+                            newFullPath = Path.Combine(
+                                _env.ContentRootPath,
+                                "uploads",
+                                "signatures",
+                                newFileName
+                            );
+                        }
+
+                        if (!oldSignaturePath.Equals(
+                            newFullPath,
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.IO.File.Move(
+                                oldSignaturePath,
+                                newFullPath
+                            );
+                        }
+
+                        officer.Signaturepath = Path.Combine(
+                            "uploads",
+                            "signatures",
+                            newFileName
+                        ).Replace('\\', '/');
+
+                        signatureCount++;
+                    }
                 }
-
-                officer.ImagePath = Path.Combine(
-                    "uploads",
-                    "profiles",
-                    newFileName
-                ).Replace('\\', '/');
-
-                profileCount++;
             }
-        }
 
-        // =========================
-        // SIGNATURE
-        // =========================
-        if (!string.IsNullOrWhiteSpace(officer.Signaturepath))
-        {
-            var oldSignaturePath = Path.Combine(
-                _env.ContentRootPath,
-                officer.Signaturepath.Replace(
-                    "/",
-                    Path.DirectorySeparatorChar.ToString()
-                )
-            );
+            await _context.SaveChangesAsync();
 
-            if (System.IO.File.Exists(oldSignaturePath))
+            return Ok(new
             {
-                var newFileName =
-                    $"{date}_{safeName}_signature.png";
-
-                var newFullPath = Path.Combine(
-                    _env.ContentRootPath,
-                    "uploads",
-                    "signatures",
-                    newFileName
-                );
-
-                // Don't overwrite another existing file
-                if (System.IO.File.Exists(newFullPath) &&
-                    !oldSignaturePath.Equals(
-                        newFullPath,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    newFileName =
-                        $"{date}_{safeName}_signature_{Guid.NewGuid():N}.png";
-
-                    newFullPath = Path.Combine(
-                        _env.ContentRootPath,
-                        "uploads",
-                        "signatures",
-                        newFileName
-                    );
-                }
-
-                if (!oldSignaturePath.Equals(
-                    newFullPath,
-                    StringComparison.OrdinalIgnoreCase))
-                {
-                    System.IO.File.Move(
-                        oldSignaturePath,
-                        newFullPath
-                    );
-                }
-
-                officer.Signaturepath = Path.Combine(
-                    "uploads",
-                    "signatures",
-                    newFileName
-                ).Replace('\\', '/');
-
-                signatureCount++;
-            }
+                message = "All officer images have been renamed successfully.",
+                profilesRenamed = profileCount,
+                signaturesRenamed = signatureCount,
+                totalOfficers = officers.Count
+            });
         }
-    }
-
-    await _context.SaveChangesAsync();
-
-    return Ok(new
-    {
-        message = "All officer images have been renamed successfully.",
-        profilesRenamed = profileCount,
-        signaturesRenamed = signatureCount,
-        totalOfficers = officers.Count
-    });
-}
 
         [HttpPost("{id}/reprocess")]
         public async Task<IActionResult> Reprocess(int id, [FromBody] ProjectOfficerRequest req)
@@ -638,127 +654,127 @@ public async Task<IActionResult> RenameAllImages()
     IFormFile? file,
     string folderName,
     string officerName)
-{
-    if (file == null || file.Length == 0)
-        return null;
+        {
+            if (file == null || file.Length == 0)
+                return null;
 
-    var uploadsFolder = Path.Combine(
-        _env.ContentRootPath,
-        "uploads",
-        folderName
-    );
+            var uploadsFolder = Path.Combine(
+                _env.ContentRootPath,
+                "uploads",
+                folderName
+            );
 
-    Directory.CreateDirectory(uploadsFolder);
+            Directory.CreateDirectory(uploadsFolder);
 
-    var safeName = SanitizeFileName(officerName);
+            var safeName = SanitizeFileName(officerName);
 
-    var extension = Path.GetExtension(file.FileName);
+            var extension = Path.GetExtension(file.FileName);
 
-    if (string.IsNullOrWhiteSpace(extension))
-        extension = ".png";
+            if (string.IsNullOrWhiteSpace(extension))
+                extension = ".png";
 
-    var suffix = folderName.Equals(
-        "profiles",
-        StringComparison.OrdinalIgnoreCase)
-        ? "profile"
-        : "image";
+            var suffix = folderName.Equals(
+                "profiles",
+                StringComparison.OrdinalIgnoreCase)
+                ? "profile"
+                : "image";
 
-    var fileName =
-        $"{DateTime.Now:yyyyMMdd}_{safeName}_{suffix}{extension}";
+            var fileName =
+                $"{DateTime.Now:yyyyMMdd}_{safeName}_{suffix}{extension}";
 
-    var fullPath = Path.Combine(
-        uploadsFolder,
-        fileName
-    );
+            var fullPath = Path.Combine(
+                uploadsFolder,
+                fileName
+            );
 
-    // Avoid accidentally overwriting another officer
-    if (System.IO.File.Exists(fullPath))
-    {
-        fileName =
-            $"{DateTime.Now:yyyyMMdd}_{safeName}_{suffix}_{Guid.NewGuid():N}{extension}";
+            // Avoid accidentally overwriting another officer
+            if (System.IO.File.Exists(fullPath))
+            {
+                fileName =
+                    $"{DateTime.Now:yyyyMMdd}_{safeName}_{suffix}_{Guid.NewGuid():N}{extension}";
 
-        fullPath = Path.Combine(
-            uploadsFolder,
-            fileName
-        );
-    }
+                fullPath = Path.Combine(
+                    uploadsFolder,
+                    fileName
+                );
+            }
 
-    await using var stream =
-        new FileStream(fullPath, FileMode.Create);
+            await using var stream =
+                new FileStream(fullPath, FileMode.Create);
 
-    await file.CopyToAsync(stream);
+            await file.CopyToAsync(stream);
 
-    return Path.Combine(
-        "uploads",
-        folderName,
-        fileName
-    ).Replace('\\', '/');
-}
+            return Path.Combine(
+                "uploads",
+                folderName,
+                fileName
+            ).Replace('\\', '/');
+        }
         private async Task<string?> SaveAndRemoveBackgroundAsync(
     IFormFile? file,
     string folderName,
     string? bgColorHex,
     string officerName)
-{
-    if (file == null || file.Length == 0)
-        return null;
+        {
+            if (file == null || file.Length == 0)
+                return null;
 
-    var uploadsFolder = Path.Combine(
-        _env.ContentRootPath,
-        "uploads",
-        folderName
-    );
+            var uploadsFolder = Path.Combine(
+                _env.ContentRootPath,
+                "uploads",
+                folderName
+            );
 
-    Directory.CreateDirectory(uploadsFolder);
+            Directory.CreateDirectory(uploadsFolder);
 
-    var safeName = SanitizeFileName(officerName);
+            var safeName = SanitizeFileName(officerName);
 
-    var fileName =
-        $"{DateTime.Now:yyyyMMdd}_{safeName}_signature.png";
+            var fileName =
+                $"{DateTime.Now:yyyyMMdd}_{safeName}_signature.png";
 
-    var fullPath = Path.Combine(
-        uploadsFolder,
-        fileName
-    );
+            var fullPath = Path.Combine(
+                uploadsFolder,
+                fileName
+            );
 
-    if (System.IO.File.Exists(fullPath))
-    {
-        fileName =
-            $"{DateTime.Now:yyyyMMdd}_{safeName}_signature_{Guid.NewGuid():N}.png";
+            if (System.IO.File.Exists(fullPath))
+            {
+                fileName =
+                    $"{DateTime.Now:yyyyMMdd}_{safeName}_signature_{Guid.NewGuid():N}.png";
 
-        fullPath = Path.Combine(
-            uploadsFolder,
-            fileName
-        );
-    }
+                fullPath = Path.Combine(
+                    uploadsFolder,
+                    fileName
+                );
+            }
 
-    using var ms = new MemoryStream();
+            using var ms = new MemoryStream();
 
-    await file.CopyToAsync(ms);
+            await file.CopyToAsync(ms);
 
-    ms.Position = 0;
+            ms.Position = 0;
 
-    // Image now unambiguously means ImageSharp.Image
-    using var image =
-        await Image.LoadAsync<Rgba32>(ms);
+            // Image now unambiguously means ImageSharp.Image
+            using var image =
+                await Image.LoadAsync<Rgba32>(ms);
 
-    bool hasColorRequest =
-        !string.IsNullOrWhiteSpace(bgColorHex) &&
-        !bgColorHex.Equals(
-            "undefined",
-            StringComparison.OrdinalIgnoreCase);
+            bool hasColorRequest =
+                !string.IsNullOrWhiteSpace(bgColorHex) &&
+                !bgColorHex.Equals(
+                    "undefined",
+                    StringComparison.OrdinalIgnoreCase);
 
-    if (hasColorRequest)
-        RemoveBackgroundColor(image, bgColorHex!);
+            if (hasColorRequest)
+                RemoveBackgroundColor(image, bgColorHex!);
 
-    await image.SaveAsPngAsync(fullPath);
+            await image.SaveAsPngAsync(fullPath);
 
-    return Path.Combine(
-        "uploads",
-        folderName,
-        fileName
-    ).Replace('\\', '/');
-}
+            return Path.Combine(
+                "uploads",
+                folderName,
+                fileName
+            ).Replace('\\', '/');
+        }
 
 
         private async Task<string?> ReprocessExistingImageAsync(string existingRelativePath, string folderName, string? bgColorHex)
@@ -846,32 +862,32 @@ public async Task<IActionResult> RenameAllImages()
             return (h, max <= 0 ? 0 : delta / max, max);
         }
         [HttpGet("export-zip")]
-public async Task<IActionResult> ExportProjectOfficersZip()
-{
-    var officers = await _context.Project_Officers
-        .Include(p => p.CreatedByUser)
-        .Include(p => p.ValidatedBy)
-        .Include(p => p.Template)
-        .OrderBy(p => p.Name)
-        .ToListAsync();
-
-    using var zipStream = new MemoryStream();
-
-    using (var archive = new ZipArchive(
-        zipStream,
-        ZipArchiveMode.Create,
-        true))
-    {
-        // =====================================================
-        // EXCEL
-        // =====================================================
-
-        using var workbook = new XLWorkbook();
-
-        var worksheet = workbook.Worksheets.Add("Project Officers");
-
-        string[] headers =
+        public async Task<IActionResult> ExportProjectOfficersZip()
         {
+            var officers = await _context.Project_Officers
+                .Include(p => p.CreatedByUser)
+                .Include(p => p.ValidatedBy)
+                .Include(p => p.Template)
+                .OrderBy(p => p.Name)
+                .ToListAsync();
+
+            using var zipStream = new MemoryStream();
+
+            using (var archive = new ZipArchive(
+                zipStream,
+                ZipArchiveMode.Create,
+                true))
+            {
+                // =====================================================
+                // EXCEL
+                // =====================================================
+
+                using var workbook = new XLWorkbook();
+
+                var worksheet = workbook.Worksheets.Add("Project Officers");
+
+                string[] headers =
+                {
             "ID",
             "Name",
             "Office",
@@ -889,209 +905,209 @@ public async Task<IActionResult> ExportProjectOfficersZip()
             "Template"
         };
 
-        for (int i = 0; i < headers.Length; i++)
-        {
-            worksheet.Cell(1, i + 1).Value = headers[i];
-        }
+                for (int i = 0; i < headers.Length; i++)
+                {
+                    worksheet.Cell(1, i + 1).Value = headers[i];
+                }
 
-        worksheet.Range(1, 1, 1, headers.Length)
-            .Style.Font.Bold = true;
+                worksheet.Range(1, 1, 1, headers.Length)
+                    .Style.Font.Bold = true;
 
-        int row = 2;
+                int row = 2;
 
-        foreach (var officer in officers)
-        {
-            worksheet.Cell(row, 1).Value = officer.ID;
-            worksheet.Cell(row, 2).Value = officer.Name;
-            worksheet.Cell(row, 3).Value = officer.Office;
-            worksheet.Cell(row, 4).Value = officer.Employee_Id_NO;
-            worksheet.Cell(row, 5).Value = officer.Address;
-            worksheet.Cell(row, 6).Value = officer.Contact_Num;
+                foreach (var officer in officers)
+                {
+                    worksheet.Cell(row, 1).Value = officer.ID;
+                    worksheet.Cell(row, 2).Value = officer.Name;
+                    worksheet.Cell(row, 3).Value = officer.Office;
+                    worksheet.Cell(row, 4).Value = officer.Employee_Id_NO;
+                    worksheet.Cell(row, 5).Value = officer.Address;
+                    worksheet.Cell(row, 6).Value = officer.Contact_Num;
 
-            if (officer.Date_of_Birth.HasValue)
-                worksheet.Cell(row, 7).Value =
-                    officer.Date_of_Birth.Value.ToString("yyyy-MM-dd");
+                    if (officer.Date_of_Birth.HasValue)
+                        worksheet.Cell(row, 7).Value =
+                            officer.Date_of_Birth.Value.ToString("yyyy-MM-dd");
 
-            if (officer.IssueDate.HasValue)
-                worksheet.Cell(row, 8).Value =
-                    officer.IssueDate.Value.ToString("yyyy-MM-dd");
+                    if (officer.IssueDate.HasValue)
+                        worksheet.Cell(row, 8).Value =
+                            officer.IssueDate.Value.ToString("yyyy-MM-dd");
 
-            if (officer.Expiration_date.HasValue)
-                worksheet.Cell(row, 9).Value =
-                    officer.Expiration_date.Value.ToString("yyyy-MM-dd");
+                    if (officer.Expiration_date.HasValue)
+                        worksheet.Cell(row, 9).Value =
+                            officer.Expiration_date.Value.ToString("yyyy-MM-dd");
 
-            worksheet.Cell(row, 10).Value = officer.Blood_Type;
-            worksheet.Cell(row, 11).Value = officer.Emergency_Con_Name;
-            worksheet.Cell(row, 12).Value = officer.Emergency_Con;
-            worksheet.Cell(row, 13).Value =
-                officer.CreatedByUser?.Name ?? "";
-            worksheet.Cell(row, 14).Value =
-                officer.ValidatedBy?.Name ?? "";
-            worksheet.Cell(row, 15).Value =
-                officer.Template?.Name ?? "";
+                    worksheet.Cell(row, 10).Value = officer.Blood_Type;
+                    worksheet.Cell(row, 11).Value = officer.Emergency_Con_Name;
+                    worksheet.Cell(row, 12).Value = officer.Emergency_Con;
+                    worksheet.Cell(row, 13).Value =
+                        officer.CreatedByUser?.Name ?? "";
+                    worksheet.Cell(row, 14).Value =
+                        officer.ValidatedBy?.Name ?? "";
+                    worksheet.Cell(row, 15).Value =
+                        officer.Template?.Name ?? "";
 
-            // =================================================
-            // PROFILE IMAGE IN EXCEL
-            // =================================================
+                    // =================================================
+                    // PROFILE IMAGE IN EXCEL
+                    // =================================================
 
-            if (!string.IsNullOrWhiteSpace(officer.ImagePath))
-            {
-                var imagePath = Path.Combine(
-                    _env.ContentRootPath,
-                    officer.ImagePath.Replace(
-                        "/",
-                        Path.DirectorySeparatorChar.ToString()
-                    )
+                    if (!string.IsNullOrWhiteSpace(officer.ImagePath))
+                    {
+                        var imagePath = Path.Combine(
+                            _env.ContentRootPath,
+                            officer.ImagePath.Replace(
+                                "/",
+                                Path.DirectorySeparatorChar.ToString()
+                            )
+                        );
+
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            worksheet.AddPicture(imagePath)
+                                .MoveTo(worksheet.Cell(row, 16))
+                                .WithSize(100, 120);
+                        }
+                    }
+
+                    // =================================================
+                    // SIGNATURE IN EXCEL
+                    // =================================================
+
+                    if (!string.IsNullOrWhiteSpace(officer.Signaturepath))
+                    {
+                        var signaturePath = Path.Combine(
+                            _env.ContentRootPath,
+                            officer.Signaturepath.Replace(
+                                "/",
+                                Path.DirectorySeparatorChar.ToString()
+                            )
+                        );
+
+                        if (System.IO.File.Exists(signaturePath))
+                        {
+                            worksheet.AddPicture(signaturePath)
+                                .MoveTo(worksheet.Cell(row, 17))
+                                .WithSize(150, 70);
+                        }
+                    }
+
+                    worksheet.Row(row).Height = 100;
+
+                    row++;
+                }
+
+                worksheet.Column(1).Width = 8;
+                worksheet.Column(2).Width = 28;
+                worksheet.Column(3).Width = 25;
+                worksheet.Column(4).Width = 18;
+                worksheet.Column(5).Width = 35;
+                worksheet.Column(6).Width = 18;
+                worksheet.Column(7).Width = 15;
+                worksheet.Column(8).Width = 15;
+                worksheet.Column(9).Width = 18;
+                worksheet.Column(10).Width = 12;
+                worksheet.Column(11).Width = 28;
+                worksheet.Column(12).Width = 20;
+                worksheet.Column(13).Width = 25;
+                worksheet.Column(14).Width = 25;
+                worksheet.Column(15).Width = 25;
+                worksheet.Column(16).Width = 18;
+                worksheet.Column(17).Width = 25;
+
+                worksheet.RangeUsed().Style.Alignment.Vertical =
+                    XLAlignmentVerticalValues.Center;
+
+                worksheet.RangeUsed().Style.Alignment.WrapText = true;
+
+                worksheet.SheetView.FreezeRows(1);
+
+                // =====================================================
+                // SAVE EXCEL INTO ZIP
+                // =====================================================
+
+                var excelEntry = archive.CreateEntry(
+                    "Project_Officers.xlsx",
+                    CompressionLevel.Fastest
                 );
 
-                if (System.IO.File.Exists(imagePath))
+                using (var excelStream = excelEntry.Open())
+                using (var tempExcel = new MemoryStream())
                 {
-                    worksheet.AddPicture(imagePath)
-                        .MoveTo(worksheet.Cell(row, 16))
-                        .WithSize(100, 120);
+                    workbook.SaveAs(tempExcel);
+
+                    tempExcel.Position = 0;
+
+                    await tempExcel.CopyToAsync(excelStream);
+                }
+
+                // =====================================================
+                // PROFILE IMAGES
+                // =====================================================
+
+                foreach (var officer in officers)
+                {
+                    if (string.IsNullOrWhiteSpace(officer.ImagePath))
+                        continue;
+
+                    var imagePath = Path.Combine(
+                        _env.ContentRootPath,
+                        officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString())
+                    );
+
+                    if (!System.IO.File.Exists(imagePath))
+                        continue;
+
+                    var extension = Path.GetExtension(imagePath);
+                    var safeName = SanitizeFileName(officer.Name ?? "Unknown");
+                    var safeTemplateName = SanitizeFileName(officer.Template?.Name ?? "No_Template");
+
+                    var profileFileName = $"{safeName}_{safeTemplateName}_profile{extension}";
+
+                    var entry = archive.CreateEntry($"profiles/{profileFileName}", CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    await using var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                    await fileStream.CopyToAsync(entryStream);
+                }
+
+                // =====================================================
+                // SIGNATURE IMAGES
+                // =====================================================
+
+                foreach (var officer in officers)
+                {
+                    if (string.IsNullOrWhiteSpace(officer.Signaturepath))
+                        continue;
+
+                    var signaturePath = Path.Combine(
+                        _env.ContentRootPath,
+                        officer.Signaturepath.Replace("/", Path.DirectorySeparatorChar.ToString())
+                    );
+
+                    if (!System.IO.File.Exists(signaturePath))
+                        continue;
+
+                    var safeName = SanitizeFileName(officer.Name ?? "Unknown");
+                    var safeTemplateName = SanitizeFileName(officer.Template?.Name ?? "No_Template");
+
+                    var signatureFileName = $"{safeName}_{safeTemplateName}_signature.png";
+
+                    var entry = archive.CreateEntry($"signatures/{signatureFileName}", CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    await using var fileStream = new FileStream(signaturePath, FileMode.Open, FileAccess.Read);
+                    await fileStream.CopyToAsync(entryStream);
                 }
             }
 
-            // =================================================
-            // SIGNATURE IN EXCEL
-            // =================================================
+            zipStream.Position = 0;
 
-            if (!string.IsNullOrWhiteSpace(officer.Signaturepath))
-            {
-                var signaturePath = Path.Combine(
-                    _env.ContentRootPath,
-                    officer.Signaturepath.Replace(
-                        "/",
-                        Path.DirectorySeparatorChar.ToString()
-                    )
-                );
+            var fileName =
+                $"Project_Officers_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
 
-                if (System.IO.File.Exists(signaturePath))
-                {
-                    worksheet.AddPicture(signaturePath)
-                        .MoveTo(worksheet.Cell(row, 17))
-                        .WithSize(150, 70);
-                }
-            }
-
-            worksheet.Row(row).Height = 100;
-
-            row++;
+            return File(
+                zipStream.ToArray(),
+                "application/zip",
+                fileName
+            );
         }
-
-        worksheet.Column(1).Width = 8;
-        worksheet.Column(2).Width = 28;
-        worksheet.Column(3).Width = 25;
-        worksheet.Column(4).Width = 18;
-        worksheet.Column(5).Width = 35;
-        worksheet.Column(6).Width = 18;
-        worksheet.Column(7).Width = 15;
-        worksheet.Column(8).Width = 15;
-        worksheet.Column(9).Width = 18;
-        worksheet.Column(10).Width = 12;
-        worksheet.Column(11).Width = 28;
-        worksheet.Column(12).Width = 20;
-        worksheet.Column(13).Width = 25;
-        worksheet.Column(14).Width = 25;
-        worksheet.Column(15).Width = 25;
-        worksheet.Column(16).Width = 18;
-        worksheet.Column(17).Width = 25;
-
-        worksheet.RangeUsed().Style.Alignment.Vertical =
-            XLAlignmentVerticalValues.Center;
-
-        worksheet.RangeUsed().Style.Alignment.WrapText = true;
-
-        worksheet.SheetView.FreezeRows(1);
-
-        // =====================================================
-        // SAVE EXCEL INTO ZIP
-        // =====================================================
-
-        var excelEntry = archive.CreateEntry(
-            "Project_Officers.xlsx",
-            CompressionLevel.Fastest
-        );
-
-        using (var excelStream = excelEntry.Open())
-        using (var tempExcel = new MemoryStream())
-        {
-            workbook.SaveAs(tempExcel);
-
-            tempExcel.Position = 0;
-
-            await tempExcel.CopyToAsync(excelStream);
-        }
-
-        // =====================================================
-        // PROFILE IMAGES
-        // =====================================================
-
-        foreach (var officer in officers)
-{
-    if (string.IsNullOrWhiteSpace(officer.ImagePath))
-        continue;
-
-    var imagePath = Path.Combine(
-        _env.ContentRootPath,
-        officer.ImagePath.Replace("/", Path.DirectorySeparatorChar.ToString())
-    );
-
-    if (!System.IO.File.Exists(imagePath))
-        continue;
-
-    var extension = Path.GetExtension(imagePath);
-    var safeName = SanitizeFileName(officer.Name ?? "Unknown");
-    var safeTemplateName = SanitizeFileName(officer.Template?.Name ?? "No_Template");
-
-    var profileFileName = $"{safeName}_{safeTemplateName}_profile{extension}";
-
-    var entry = archive.CreateEntry($"profiles/{profileFileName}", CompressionLevel.Fastest);
-    await using var entryStream = entry.Open();
-    await using var fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
-    await fileStream.CopyToAsync(entryStream);
-}
-
-        // =====================================================
-        // SIGNATURE IMAGES
-        // =====================================================
-
-       foreach (var officer in officers)
-{
-    if (string.IsNullOrWhiteSpace(officer.Signaturepath))
-        continue;
-
-    var signaturePath = Path.Combine(
-        _env.ContentRootPath,
-        officer.Signaturepath.Replace("/", Path.DirectorySeparatorChar.ToString())
-    );
-
-    if (!System.IO.File.Exists(signaturePath))
-        continue;
-
-    var safeName = SanitizeFileName(officer.Name ?? "Unknown");
-    var safeTemplateName = SanitizeFileName(officer.Template?.Name ?? "No_Template");
-
-    var signatureFileName = $"{safeName}_{safeTemplateName}_signature.png";
-
-    var entry = archive.CreateEntry($"signatures/{signatureFileName}", CompressionLevel.Fastest);
-    await using var entryStream = entry.Open();
-    await using var fileStream = new FileStream(signaturePath, FileMode.Open, FileAccess.Read);
-    await fileStream.CopyToAsync(entryStream);
-}
-    }
-
-    zipStream.Position = 0;
-
-    var fileName =
-        $"Project_Officers_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
-
-    return File(
-        zipStream.ToArray(),
-        "application/zip",
-        fileName
-    );
-}
     }
 
     public class ProjectOfficerRequest
@@ -1117,5 +1133,6 @@ public async Task<IActionResult> ExportProjectOfficersZip()
         public IFormFile? Signature { get; set; }
         public string? BackgroundColor { get; set; }
         public bool RemoveImage { get; set; }
+        public bool RemoveSignatureImage { get; set; }
     }
 }
