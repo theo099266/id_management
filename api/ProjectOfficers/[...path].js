@@ -4,64 +4,53 @@ export const config = {
   },
 };
 
-const BACKEND_URL =
-  "https://id-management-api.runasp.net";
-
 export default async function handler(req, res) {
   console.log("=================================");
-  console.log("🔥 PROJECT OFFICERS VERCEL PROXY");
+  console.log("🔥 PROJECT OFFICERS VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
-  console.log("Query:", req.query);
   console.log("=================================");
 
   try {
-    // -----------------------------------------
-    // GET CATCH-ALL PATH
-    // -----------------------------------------
+    const url = new URL(
+      req.url,
+      `https://${req.headers.host}`
+    );
 
-    const { path } = req.query;
+    // Remove /api/ProjectOfficers/ from the URL
+    const targetPath = url.pathname.replace(
+      /^\/api\/ProjectOfficers\/?/,
+      ""
+    );
 
-    const targetPath = Array.isArray(path)
-      ? path.join("/")
-      : path || "";
+    // Build backend URL
+    const backendUrl = targetPath
+      ? `https://id-management-api.runasp.net/api/ProjectOfficers/${targetPath}${url.search}`
+      : `https://id-management-api.runasp.net/api/ProjectOfficers${url.search}`;
 
     console.log("Target Path:", targetPath);
-
-    // -----------------------------------------
-    // BACKEND URL
-    // -----------------------------------------
-
-    const backendUrl =
-      targetPath
-        ? `${BACKEND_URL}/api/ProjectOfficers/${targetPath}`
-        : `${BACKEND_URL}/api/ProjectOfficers`;
-
     console.log("Backend:", backendUrl);
 
     // -----------------------------------------
-    // HEADERS
+    // FORWARD HEADERS
     // -----------------------------------------
 
     const headers = {};
 
     if (req.headers.authorization) {
-      headers.Authorization =
-        req.headers.authorization;
+      headers.Authorization = req.headers.authorization;
     }
 
     if (req.headers["content-type"]) {
-      headers["Content-Type"] =
-        req.headers["content-type"];
+      headers["Content-Type"] = req.headers["content-type"];
     }
 
     if (req.headers["content-length"]) {
-      headers["Content-Length"] =
-        req.headers["content-length"];
+      headers["Content-Length"] = req.headers["content-length"];
     }
 
     // -----------------------------------------
-    // OPTIONS
+    // REQUEST OPTIONS
     // -----------------------------------------
 
     const options = {
@@ -70,18 +59,28 @@ export default async function handler(req, res) {
     };
 
     // -----------------------------------------
-    // BODY
+    // FORWARD RAW BODY
     // -----------------------------------------
+    //
+    // IMPORTANT:
+    // Do NOT JSON.stringify(req.body).
+    //
+    // This allows multipart/form-data and
+    // IFormFile uploads to pass through.
+    //
 
     if (!["GET", "HEAD"].includes(req.method)) {
       options.body = req;
+
+      // Required by Node.js fetch when sending
+      // a streaming request body.
       options.duplex = "half";
     }
 
     console.log("Sending request to backend...");
 
     // -----------------------------------------
-    // REQUEST
+    // CALL ASP.NET BACKEND
     // -----------------------------------------
 
     const response = await fetch(
@@ -95,13 +94,11 @@ export default async function handler(req, res) {
     );
 
     // -----------------------------------------
-    // RESPONSE HEADERS
+    // FORWARD RESPONSE CONTENT TYPE
     // -----------------------------------------
 
     const contentType =
-      response.headers.get(
-        "content-type"
-      );
+      response.headers.get("content-type");
 
     if (contentType) {
       res.setHeader(
@@ -110,24 +107,11 @@ export default async function handler(req, res) {
       );
     }
 
-    const contentDisposition =
-      response.headers.get(
-        "content-disposition"
-      );
-
-    if (contentDisposition) {
-      res.setHeader(
-        "Content-Disposition",
-        contentDisposition
-      );
-    }
-
     // -----------------------------------------
-    // RESPONSE BODY
+    // RETURN BACKEND RESPONSE
     // -----------------------------------------
 
-    const data =
-      await response.arrayBuffer();
+    const data = await response.arrayBuffer();
 
     return res
       .status(response.status)
@@ -149,8 +133,7 @@ export default async function handler(req, res) {
     );
 
     return res.status(502).json({
-      error:
-        "Project Officers proxy failed",
+      error: "Project Officers proxy failed",
       details: error.message,
     });
   }
