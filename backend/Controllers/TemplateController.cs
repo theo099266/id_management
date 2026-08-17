@@ -146,39 +146,97 @@ namespace Backend.Controllers
 
 
 
-            if(request.FrontBackground != null)
-            {
-                DeleteFile(template.FrontID_background_image);
+          // ==========================================
+// FRONT BACKGROUND
+// ==========================================
 
-                template.FrontID_background_image =
-                    await SaveImage(
-                        request.FrontBackground,
-                        "templates");
-            }
+if (request.RemoveFrontBackground)
+{
+    DeleteFile(template.FrontID_background_image);
+    template.FrontID_background_image = null;
+}
+else if (request.FrontBackground != null &&
+         request.FrontBackground.Length > 0)
+{
+    var oldPath = template.FrontID_background_image;
+
+    var newPath = await SaveImage(
+        request.FrontBackground,
+        "templates"
+    );
+
+    if (string.IsNullOrWhiteSpace(newPath))
+    {
+        return StatusCode(500, "Front background could not be saved.");
+    }
+
+    template.FrontID_background_image = newPath;
+
+    // Delete old only after new image was successfully saved
+    DeleteFile(oldPath);
+}
 
 
-            if(request.FrontFooter != null)
-            {
-                DeleteFile(template.FrontID_Footer_image);
+// ==========================================
+// FRONT FOOTER
+// ==========================================
 
-                template.FrontID_Footer_image =
-                    await SaveImage(
-                        request.FrontFooter,
-                        "templates");
-            }
+if (request.RemoveFrontFooter)
+{
+    DeleteFile(template.FrontID_Footer_image);
+    template.FrontID_Footer_image = null;
+}
+else if (request.FrontFooter != null &&
+         request.FrontFooter.Length > 0)
+{
+    var oldPath = template.FrontID_Footer_image;
+
+    var newPath = await SaveImage(
+        request.FrontFooter,
+        "templates"
+    );
+
+    if (string.IsNullOrWhiteSpace(newPath))
+    {
+        return StatusCode(500, "Front footer could not be saved.");
+    }
+
+    template.FrontID_Footer_image = newPath;
+
+    // Delete old only after new image was successfully saved
+    DeleteFile(oldPath);
+}
 
 
+// ==========================================
+// BACKGROUND
+// ==========================================
 
-            if(request.BackBackground != null)
-            {
-                DeleteFile(template.BackID_background);
+if (request.RemoveBackBackground)
+{
+    DeleteFile(template.BackID_background);
+    template.BackID_background = null;
+}
+else if (request.BackBackground != null &&
+         request.BackBackground.Length > 0)
+{
+    var oldPath = template.BackID_background;
 
-                template.BackID_background =
-                    await SaveImage(
-                        request.BackBackground,
-                        "templates");
-            }
+    var newPath = await SaveImage(
+        request.BackBackground,
+        "templates"
+    );
 
+    if (string.IsNullOrWhiteSpace(newPath))
+    {
+        return StatusCode(500, "Back background could not be saved.");
+    }
+
+    template.BackID_background = newPath;
+
+    // Delete old only after new image was successfully saved
+    DeleteFile(oldPath);
+}
 
 
             await _context.SaveChangesAsync();
@@ -423,5 +481,8 @@ namespace Backend.Controllers
         public IFormFile? FrontFooter { get; set; }
 
         public IFormFile? BackBackground { get; set; }
+        public bool RemoveFrontBackground { get; set; }
+public bool RemoveFrontFooter { get; set; }
+public bool RemoveBackBackground { get; set; }
     }
 }

@@ -62,54 +62,122 @@ namespace Backend.Controllers
 
             return CreatedAtAction(nameof(GetAdministratives), new { id = admin.AdministrativeID }, admin);
         }
+        private void DeleteFile(string? relativePath)
+{
+    if (string.IsNullOrWhiteSpace(relativePath))
+        return;
+
+    var fullPath = Path.Combine(
+        _env.ContentRootPath,
+        relativePath.Replace(
+            "/",
+            Path.DirectorySeparatorChar.ToString()
+        )
+    );
+
+    if (System.IO.File.Exists(fullPath))
+    {
+        System.IO.File.Delete(fullPath);
+    }
+}
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromForm] AdministrativeRequest request)
+public async Task<IActionResult> Update(
+    int id,
+    [FromForm] AdministrativeRequest request)
+{
+    var admin = await _context.Administratives.FindAsync(id);
+
+    if (admin == null)
+        return NotFound();
+
+    admin.Name = request.Name ?? admin.Name;
+    admin.Office = request.Office ?? admin.Office;
+    admin.CreatedBy = request.CreatedBy ?? admin.CreatedBy;
+
+
+    // ==========================================
+    // REMOVE IMAGE
+    // ==========================================
+
+    if (request.RemoveSignatureImage)
+    {
+        // Delete old physical file
+        DeleteFile(admin.SignatureImage_AD);
+
+        // Clear database column
+        admin.SignatureImage_AD = null;
+    }
+
+
+    // ==========================================
+    // REPLACE WITH NEW IMAGE
+    // ==========================================
+
+    else if (request.SignatureImage != null &&
+             request.SignatureImage.Length > 0)
+    {
+        // Keep reference to old image
+        var oldPath = admin.SignatureImage_AD;
+
+        // Save NEW image first
+        var newPath = await SaveAndRemoveBackgroundAsync(
+            request.SignatureImage,
+            "administrative",
+            request.BackgroundColor
+        );
+
+        if (string.IsNullOrWhiteSpace(newPath))
         {
-            var admin = await _context.Administratives.FindAsync(id);
-            if (admin == null) return NotFound();
-
-            admin.Name = request.Name ?? admin.Name;
-            admin.Office = request.Office ?? admin.Office;
-            admin.CreatedBy = request.CreatedBy ?? admin.CreatedBy;
-
-            if (request.SignatureImage != null && request.SignatureImage.Length > 0)
-            {
-                // delete old file
-                if (!string.IsNullOrEmpty(admin.SignatureImage_AD))
-                {
-                    var oldFilePath = Path.Combine(
-                        _env.ContentRootPath,
-                        admin.SignatureImage_AD.Replace("/", Path.DirectorySeparatorChar.ToString())
-                    );
-                    if (System.IO.File.Exists(oldFilePath))
-                        System.IO.File.Delete(oldFilePath);
-                }
-
-                admin.SignatureImage_AD = await SaveAndRemoveBackgroundAsync(
-                    request.SignatureImage, "administrative", request.BackgroundColor
-                );
-            }
-            else if (!string.IsNullOrWhiteSpace(request.BackgroundColor) && !string.IsNullOrEmpty(admin.SignatureImage_AD))
-            {
-                // Reprocess existing stored image using the new background color
-                var newPath = await ReprocessExistingImageAsync(admin.SignatureImage_AD, "administrative", request.BackgroundColor);
-                if (newPath != null)
-                {
-                    var oldPath = Path.Combine(_env.ContentRootPath, admin.SignatureImage_AD.Replace("/", Path.DirectorySeparatorChar.ToString()));
-                    if (System.IO.File.Exists(oldPath) &&
-                        !oldPath.Equals(Path.Combine(_env.ContentRootPath, newPath.Replace("/", Path.DirectorySeparatorChar.ToString())), StringComparison.OrdinalIgnoreCase))
-                    {
-                        System.IO.File.Delete(oldPath);
-                    }
-                    admin.SignatureImage_AD = newPath;
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return StatusCode(
+                500,
+                "Administrative signature could not be saved."
+            );
         }
 
+        // Update database to new image
+        admin.SignatureImage_AD = newPath;
+
+        // Delete OLD image only after new image succeeded
+        DeleteFile(oldPath);
+    }
+
+
+    // ==========================================
+    // REPROCESS EXISTING IMAGE
+    // ==========================================
+
+    else if (!string.IsNullOrWhiteSpace(request.BackgroundColor) &&
+             !string.IsNullOrEmpty(admin.SignatureImage_AD))
+    {
+        var oldPath = admin.SignatureImage_AD;
+
+        var newPath = await ReprocessExistingImageAsync(
+            oldPath,
+            "administrative",
+            request.BackgroundColor
+        );
+
+        if (newPath != null)
+        {
+            // Update database
+            admin.SignatureImage_AD = newPath;
+
+            // Delete old file
+            if (!oldPath.Equals(
+                    newPath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                DeleteFile(oldPath);
+            }
+        }
+    }
+
+
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -348,5 +416,6 @@ public async Task<IActionResult> DeleteImage(int id)
         public int? CreatedBy { get; set; }
         public IFormFile? SignatureImage { get; set; }
         public string? BackgroundColor { get; set; }
+        public bool RemoveSignatureImage { get; set; }
     }
 }

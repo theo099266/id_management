@@ -200,11 +200,11 @@ Signaturepath = await SaveAndRemoveBackgroundAsync(
             officer.Validated_by = request.Validated_by ?? officer.Validated_by;
             officer.TemplateID = request.TemplateID ?? officer.TemplateID;
 
-            if (request.Image != null && request.Image.Length > 0)
+            if (request.RemoveImage)
 {
-    if (!string.IsNullOrEmpty(officer.ImagePath))
+    if (!string.IsNullOrWhiteSpace(officer.ImagePath))
     {
-        var oldImgPath = Path.Combine(
+        var oldImagePath = Path.Combine(
             _env.ContentRootPath,
             officer.ImagePath.Replace(
                 "/",
@@ -212,15 +212,52 @@ Signaturepath = await SaveAndRemoveBackgroundAsync(
             )
         );
 
-        if (System.IO.File.Exists(oldImgPath))
-            System.IO.File.Delete(oldImgPath);
+        if (System.IO.File.Exists(oldImagePath))
+        {
+            System.IO.File.Delete(oldImagePath);
+        }
     }
 
-    officer.ImagePath = await SavePlainImageAsync(
+    // Clear database column
+    officer.ImagePath = null;
+}
+
+// CASE 2: User selected a NEW image
+else if (request.Image != null && request.Image.Length > 0)
+{
+    var oldImagePath = officer.ImagePath;
+
+    // Save the NEW image first
+    var newImagePath = await SavePlainImageAsync(
         request.Image,
         "profiles",
         officer.Name
     );
+
+    if (string.IsNullOrWhiteSpace(newImagePath))
+    {
+        return StatusCode(500, "Image could not be saved.");
+    }
+
+    // Update database to new image
+    officer.ImagePath = newImagePath;
+
+    // Delete OLD image AFTER the new one was successfully saved
+    if (!string.IsNullOrWhiteSpace(oldImagePath))
+    {
+        var oldFullPath = Path.Combine(
+            _env.ContentRootPath,
+            oldImagePath.Replace(
+                "/",
+                Path.DirectorySeparatorChar.ToString()
+            )
+        );
+
+        if (System.IO.File.Exists(oldFullPath))
+        {
+            System.IO.File.Delete(oldFullPath);
+        }
+    }
 }
 
 
@@ -1079,5 +1116,6 @@ public async Task<IActionResult> ExportProjectOfficersZip()
         public IFormFile? Image { get; set; }
         public IFormFile? Signature { get; set; }
         public string? BackgroundColor { get; set; }
+        public bool RemoveImage { get; set; }
     }
 }

@@ -22,6 +22,7 @@ const emptyForm = {
   office: "",
   signature: null,
   backgroundColor: "",
+  removeSignatureImage: false,
   createdBy: null,
 };
 
@@ -114,6 +115,7 @@ const getImageUrl = (path) => {
         ...prev,
         signature: file,
         backgroundColor: "",
+        removeSignatureImage: false,
       }));
       setSignaturePreviewUrl(dataUrl);
     });
@@ -140,6 +142,7 @@ const getImageUrl = (path) => {
       office: item.office ?? "",
       signature: null,
       backgroundColor: "",
+      removeSignatureImage: false, 
       createdBy: item.createdBy || user?.id || 1,
     });
 
@@ -165,7 +168,7 @@ const getImageUrl = (path) => {
     const file = e.target.files?.[0] ?? null;
     if (!file) return;
     const url = URL.createObjectURL(file);
-    setForm((prev) => ({ ...prev, signature: file }));
+    setForm((prev) => ({ ...prev, signature: file, removeSignatureImage: false }));
     setSignaturePreviewUrl(url);
   };
 
@@ -267,6 +270,8 @@ const getImageUrl = (path) => {
       if (form.signature) formData.append("SignatureImage", form.signature);
       if (form.backgroundColor)
         formData.append("BackgroundColor", form.backgroundColor);
+      if (form.removeSignatureImage)
+        formData.append("RemoveSignatureImage", "true");
 
       if (editingItem) {
         await api.put(
@@ -309,6 +314,20 @@ const getImageUrl = (path) => {
       setDeleting(false);
     }
   };
+  const handleRemoveSignature = () => {
+  if (signaturePreviewUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(signaturePreviewUrl);
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    signature: null,
+    backgroundColor: "",
+    removeSignatureImage: true,
+  }));
+
+  setSignaturePreviewUrl("");
+};
 
   return (
     <div className="p-8 bg-[#F5FFF5] min-h-screen">
@@ -549,7 +568,7 @@ const getImageUrl = (path) => {
                       {/* Remove button */}
                       <button
                         type="button"
-                        onClick={removeSignature}
+                         onClick={handleRemoveSignature}
                         className="mt-3 w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-800 text-sm border rounded-lg py-2"
                       >
                         <FaTrash size={12} /> Remove signature
@@ -589,6 +608,7 @@ const getImageUrl = (path) => {
                         ...prev,
                         signature: file,
                         backgroundColor: "",
+                        removeSignatureImage: false,
                       }));
                       setSignaturePreviewUrl(dataUrl);
                       setIsSignatureModalOpen(false);

@@ -23,6 +23,9 @@ const emptyForm = {
   frontBackground: null,
   frontFooter: null,
   backBackground: null,
+  removeFrontBackground: false,
+  removeFrontFooter: false,
+  removeBackBackground: false,
   createdBy: null,
 };
 const IMAGE_FIELDS = [
@@ -30,6 +33,8 @@ const IMAGE_FIELDS = [
     key: "frontBackground",
     apiField: "FrontID_background_image",
     formKey: "FrontBackground",
+    removeFlag: "removeFrontBackground",
+    removeFormKey: "RemoveFrontBackground",
     deleteType: "frontbackground",
     label: "Front ID Background",
   },
@@ -37,6 +42,8 @@ const IMAGE_FIELDS = [
     key: "frontFooter",
     apiField: "FrontID_Footer_image",
     formKey: "FrontFooter",
+    removeFlag: "removeFrontFooter",
+    removeFormKey: "RemoveFrontFooter",
     deleteType: "frontfooter",
     label: "Front ID Footer",
   },
@@ -44,6 +51,8 @@ const IMAGE_FIELDS = [
     key: "backBackground",
     apiField: "BackID_background",
     formKey: "BackBackground",
+    removeFlag: "removeBackBackground",
+    removeFormKey: "RemoveBackBackground",
     deleteType: "backbackground",
     label: "Back ID Background",
   },
@@ -95,8 +104,9 @@ export default function Template() {
 
   // --- moved here, inside the component ---
   const makeImageDropHandler = (key) => (file) => {
+    const field = IMAGE_FIELDS.find((f) => f.key === key);
     const url = URL.createObjectURL(file);
-    setForm((prev) => ({ ...prev, [key]: file }));
+    setForm((prev) => ({ ...prev, [key]: file, [field.removeFlag]: false }));
     setPreviewUrls((prev) => ({ ...prev, [key]: url }));
   };
 
@@ -118,20 +128,20 @@ export default function Template() {
 
   const BACKEND_URL = "https://id-management-api.runasp.net";
 
-const getImageUrl = (path) => {
-  if (!path) return "";
+  const getImageUrl = (path) => {
+    if (!path) return "";
 
-  if (
-    path.startsWith("http://") ||
-    path.startsWith("https://") ||
-    path.startsWith("data:image") ||
-    path.startsWith("blob:")
-  ) {
-    return path;
-  }
+    if (
+      path.startsWith("http://") ||
+      path.startsWith("https://") ||
+      path.startsWith("data:image") ||
+      path.startsWith("blob:")
+    ) {
+      return path;
+    }
 
-  return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
-};
+    return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
+  };
 
   //data loading
   const loadTemplates = async () => {
@@ -199,6 +209,9 @@ const getImageUrl = (path) => {
       frontBackground: null,
       frontFooter: null,
       backBackground: null,
+      removeFrontBackground: false,
+      removeFrontFooter: false,
+      removeBackBackground: false,
       createdBy: item.createdBy || user?.id || 1,
     });
 
@@ -230,8 +243,9 @@ const getImageUrl = (path) => {
   const handleFileChange = (key) => (e) => {
     const file = e.target.files?.[0] ?? null;
     if (!file) return;
+    const field = IMAGE_FIELDS.find((f) => f.key === key);
     const url = URL.createObjectURL(file);
-    setForm((prev) => ({ ...prev, [key]: file }));
+    setForm((prev) => ({ ...prev, [key]: file, [field.removeFlag]: false }));
     setPreviewUrls((prev) => ({ ...prev, [key]: url }));
   };
 
@@ -273,6 +287,9 @@ const getImageUrl = (path) => {
         if (form[field.key]) {
           formData.append(field.formKey, form[field.key]);
         }
+        if (form[field.removeFlag]) {
+          formData.append(field.removeFormKey, "true");
+        }
       });
 
       if (editingItem) {
@@ -293,6 +310,19 @@ const getImageUrl = (path) => {
     } finally {
       setIsSaving(false);
     }
+  };
+  const handleRemoveImage = (field) => {
+    if (previewUrls[field.key]?.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrls[field.key]);
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [field.key]: null,
+      [field.removeFlag]: true,
+    }));
+
+    setPreviewUrls((prev) => ({ ...prev, [field.key]: "" }));
   };
 
   const handleDelete = async () => {
@@ -627,7 +657,7 @@ const getImageUrl = (path) => {
                           </div>
                           <button
                             type="button"
-                            onClick={() => removeImage(field)}
+                            onClick={() => handleRemoveImage(field)}
                             className="mt-2 w-full flex items-center justify-center gap-1 text-red-600 hover:text-red-800 text-xs border rounded py-1.5"
                           >
                             <FaTrash size={10} /> Remove

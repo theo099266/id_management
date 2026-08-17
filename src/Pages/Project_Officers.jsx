@@ -54,6 +54,7 @@ const emptyForm = {
   signature: null,
   backgroundColor: "",
   removeImageBackground: false,
+   removeImage: false,
   createdBy: null,
 };
 
@@ -401,6 +402,7 @@ const getImageUrl = (path) => {
       image: null,
       signature: null,
       backgroundColor: "",
+      removeSignatureImage: false,
       createdBy: item.createdBy || user?.id || 1,
     });
     setImagePreviewUrl(item.imagePath ? getImageUrl(item.imagePath) : "");
@@ -508,7 +510,7 @@ const getImageUrl = (path) => {
       URL.revokeObjectURL(imagePreviewUrl);
     }
     const url = URL.createObjectURL(file);
-    setForm((prev) => ({ ...prev, image: file }));
+     setForm((prev) => ({ ...prev, image: file, removeImage: false }));
     setImagePreviewUrl(url);
   };
 
@@ -616,6 +618,7 @@ const getImageUrl = (path) => {
   }
 };
 
+
 const handleExportZip = async () => {
   if (isExporting) return;
 
@@ -714,6 +717,7 @@ const handleExportZip = async () => {
     if (form.validatedBy) formData.append("Validated_by", form.validatedBy);
     if (form.templateId) formData.append("TemplateID", form.templateId);
     if (form.image) formData.append("Image", form.image);
+    if (form.removeImage) formData.append("RemoveImage", "true");
 
     if (form.signature) formData.append("Signature", form.signature);
     if (form.backgroundColor)
@@ -741,6 +745,7 @@ const handleExportZip = async () => {
 
   return savedOfficer;
 };
+
   const selectedTemplate = useMemo(
     () =>
       templates.find((t) => String(t.templateID) === String(form.templateId)),
@@ -769,6 +774,19 @@ const handleExportZip = async () => {
       setIsSaving(false);
     }
   };
+  const handleRemoveImage = () => {
+  if (imagePreviewUrl?.startsWith("blob:")) {
+    URL.revokeObjectURL(imagePreviewUrl);
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    image: null,
+    removeImage: true,
+  }));
+
+  setImagePreviewUrl("");
+};
 
   const handleSaveAndPreview = async () => {
     if (!validateForm()) return;
@@ -1110,7 +1128,7 @@ const handleExportZip = async () => {
 
     <button
       type="button"
-      onClick={removeImage}
+      onClick={handleRemoveImage}
       className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-800 text-sm border rounded-lg py-2"
     >
       <FaTrash size={12} /> Remove photo
@@ -1604,6 +1622,7 @@ const handleExportZip = async () => {
                         ...prev,
                         signature: file,
                         backgroundColor: "",
+                        removeSignatureImage: false,
                       }));
                       setSignaturePreviewUrl(dataUrl);
                       setIsSignatureModalOpen(false);
