@@ -76,6 +76,8 @@ export default function ProjectOfficers() {
   const [signaturePreviewUrl, setSignaturePreviewUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleSignatureDropFile = useCallback(
     (file) => {
@@ -588,12 +590,78 @@ const getImageUrl = (path) => {
       }
     };
   };
+  const handleRenameAllImages = async () => {
+  if (isRenaming) return;
+
+  const confirmed = window.confirm(
+    "This will rename ALL profile and signature images on the server. Continue?"
+  );
+  if (!confirmed) return;
+
+  setIsRenaming(true);
+  try {
+    const res = await api.post(`${ENDPOINT}/rename-all-images`);
+    console.log("Rename result:", res.data);
+    alert(
+      `Done!\nProfiles renamed: ${res.data.profilesRenamed}\nSignatures renamed: ${res.data.signaturesRenamed}\nTotal officers: ${res.data.totalOfficers}`
+    );
+    await loadOfficers();
+  } catch (err) {
+    console.error("Failed to rename images:", err);
+    console.error("Status:", err.response?.status);
+    console.error("Response:", err.response?.data);
+    alert("Failed to rename images. Check console for details.");
+  } finally {
+    setIsRenaming(false);
+  }
+};
+
+const handleExportZip = async () => {
+  if (isExporting) return;
+
+  setIsExporting(true);
+  try {
+    const res = await api.get(`${ENDPOINT}/export-zip`, {
+      responseType: "blob",
+    });
+
+    // Try to pull the filename the backend set, otherwise fall back
+    const disposition = res.headers["content-disposition"];
+    let filename = `Project_Officers_${Date.now()}.zip`;
+    if (disposition) {
+      const match = disposition.match(/filename="?([^"]+)"?/);
+      if (match?.[1]) filename = match[1];
+    }
+
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Failed to export zip:", err);
+    console.error("Status:", err.response?.status);
+    console.error("Response:", err.response?.data);
+    alert("Failed to export data. Check console for details.");
+  } finally {
+    setIsExporting(false);
+  }
+};
 
   const removeImage = async () => {
-  if (!editingItem?.id) return;
+  if (!editingItem?.id) {
+    console.warn("[removeImage] No editingItem.id — aborting");
+    return;
+  }
+
+  console.log("[removeImage] Deleting image for id:", editingItem.id);
 
   try {
-    await api.delete(`${ENDPOINT}/${editingItem.id}/image`);
+    const res = await api.delete(`${ENDPOINT}/${editingItem.id}/image`);
+    console.log("[removeImage] Success:", res.status);
 
     setForm((prev) => ({
       ...prev,
@@ -744,22 +812,38 @@ const getImageUrl = (path) => {
     <div className="p-8 bg-[#F5FFF5] min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-green-800">
-            Placeholder
-          </h1>
-          <p className="text-gray-600">
-            Manage employee ID cards and personal information. s
-          </p>
-        </div>
-        <button
-          onClick={openCreateModal}
-          className="bg-[#2E7D32] hover:bg-green-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
-        >
-          <FaPlus />
-          Add Officer
-        </button>
-      </div>
+  <div>
+    <h1 className="text-3xl font-bold text-green-800">
+      Placeholder
+    </h1>
+    <p className="text-gray-600">
+      Manage employee ID cards and personal information. s
+    </p>
+  </div>
+  <div className="flex gap-3">
+    <button
+      onClick={handleRenameAllImages}
+      disabled={isRenaming}
+      className="bg-gray-600 hover:bg-gray-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 disabled:opacity-60"
+    >
+      {isRenaming ? "Renaming..." : "Rename All Images"}
+    </button>
+    <button
+      onClick={handleExportZip}
+      disabled={isExporting}
+      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 disabled:opacity-60"
+    >
+      {isExporting ? "Exporting..." : "Download All Data"}
+    </button>
+    <button
+      onClick={openCreateModal}
+      className="bg-[#2E7D32] hover:bg-green-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
+    >
+      <FaPlus />
+      Add Officer
+    </button>
+  </div>
+</div>
 
       {/* Search */}
       <div className="bg-white rounded-xl shadow p-4 mb-6">

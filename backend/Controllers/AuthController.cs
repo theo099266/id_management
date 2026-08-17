@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.RateLimiting;
-
+using Microsoft.AspNetCore.Authorization;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -24,6 +24,7 @@ public class AuthController : ControllerBase
         _config = config;
     }
 
+    [AllowAnonymous]
     [EnableRateLimiting("login")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
@@ -31,7 +32,7 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByNameAsync(request.Username);
         if (user == null)
             return Unauthorized(new { message = "Invalid username or password" });
-         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
         if (!signInResult.Succeeded)
             return Unauthorized(new { message = "Invalid username or password" });
 
@@ -60,7 +61,7 @@ public class AuthController : ControllerBase
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-  
+
 
         return Ok(new
         {
@@ -69,14 +70,14 @@ public class AuthController : ControllerBase
             name = user.Name,
             username = user.UserName,
             role = user.Role,
-            
+
             image = user.ImagePath
         });
     }
     [HttpPost("admin-reset-password")]
     public async Task<IActionResult> AdminResetPassword(AdminResetRequest request)
     {
-        
+
         var user = await _userManager.FindByIdAsync(request.UserId.ToString());
         if (user == null)
             return NotFound(new { message = "User not found" });
@@ -104,7 +105,7 @@ public class AuthController : ControllerBase
         if (existing != null)
             return BadRequest(new { message = "Username already exists" });
 
-        
+
         var user = new ApplicationUser
         {
             UserName = request.Username,
@@ -112,7 +113,7 @@ public class AuthController : ControllerBase
             Email = request.Email,
             Role = request.Role ?? "",
             Status = request.Status ?? "Active",
-            
+
         };
 
         if (request.Image != null && request.Image.Length > 0)
@@ -146,7 +147,7 @@ public class AuthController : ControllerBase
             name = user.Name,
             username = user.UserName,
             role = user.Role,
-          
+
             image = user.ImagePath
         });
 

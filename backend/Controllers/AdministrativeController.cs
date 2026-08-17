@@ -134,27 +134,57 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id}/image")]
-        public async Task<IActionResult> DeleteImage(int id)
+public async Task<IActionResult> DeleteImage(int id)
+{
+    Console.WriteLine($"[Administrative.DeleteImage] Called with id={id}");
+
+    var admin = await _context.Administratives.FindAsync(id);
+    if (admin == null)
+    {
+        Console.WriteLine($"[Administrative.DeleteImage] Administrative with id={id} not found.");
+        return NotFound();
+    }
+
+    Console.WriteLine($"[Administrative.DeleteImage] Current SignatureImage_AD='{admin.SignatureImage_AD}'");
+
+    if (!string.IsNullOrEmpty(admin.SignatureImage_AD))
+    {
+        var path = Path.Combine(
+            _env.ContentRootPath,
+            admin.SignatureImage_AD.Replace("/", Path.DirectorySeparatorChar.ToString())
+        );
+
+        Console.WriteLine($"[Administrative.DeleteImage] Resolved file path='{path}'");
+
+        if (System.IO.File.Exists(path))
         {
-            var admin = await _context.Administratives.FindAsync(id);
-            if (admin == null) return NotFound();
-
-            if (!string.IsNullOrEmpty(admin.SignatureImage_AD))
+            try
             {
-                var path = Path.Combine(
-                    _env.ContentRootPath,
-                    admin.SignatureImage_AD.Replace("/", Path.DirectorySeparatorChar.ToString())
-                );
-
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
-
-                admin.SignatureImage_AD = null;
-                await _context.SaveChangesAsync();
+                System.IO.File.Delete(path);
+                Console.WriteLine("[Administrative.DeleteImage] File deleted from disk.");
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Administrative.DeleteImage] Failed to delete file: {ex.Message}");
+                return StatusCode(500, new { message = "Failed to delete image file.", error = ex.Message });
+            }
         }
+        else
+        {
+            Console.WriteLine("[Administrative.DeleteImage] File does not exist on disk, skipping delete.");
+        }
+
+        admin.SignatureImage_AD = null;
+        await _context.SaveChangesAsync();
+        Console.WriteLine("[Administrative.DeleteImage] SignatureImage_AD cleared and saved.");
+    }
+    else
+    {
+        Console.WriteLine("[Administrative.DeleteImage] SignatureImage_AD was already null/empty, nothing to do.");
+    }
+
+    return NoContent();
+}
 
         [HttpGet("byUser/{userId}")]
         public async Task<IActionResult> GetAdministrativesByUser(int userId)
