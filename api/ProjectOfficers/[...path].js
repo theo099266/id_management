@@ -4,6 +4,8 @@ export const config = {
   },
 };
 
+const BACKEND_URL = "https://id-management-api.runasp.net";
+
 export default async function handler(req, res) {
   console.log("=================================");
   console.log("🔥 PROJECT OFFICERS VERCEL FUNCTION HIT");
@@ -19,34 +21,37 @@ export default async function handler(req, res) {
 
     // Remove /api/ProjectOfficers/ from the URL
     const targetPath = url.pathname.replace(
-      /^\/api\/ProjectOfficers\/?/,
+      /^\/api\/ProjectOfficers\/?/i,
       ""
     );
 
     // Build backend URL
     const backendUrl = targetPath
-      ? `https://id-management-api.runasp.net/api/ProjectOfficers/${targetPath}${url.search}`
-      : `https://id-management-api.runasp.net/api/ProjectOfficers${url.search}`;
+      ? `${BACKEND_URL}/api/ProjectOfficers/${targetPath}${url.search}`
+      : `${BACKEND_URL}/api/ProjectOfficers${url.search}`;
 
     console.log("Target Path:", targetPath);
     console.log("Backend:", backendUrl);
 
     // -----------------------------------------
-    // FORWARD HEADERS
+    // HEADERS
     // -----------------------------------------
 
     const headers = {};
 
     if (req.headers.authorization) {
-      headers.Authorization = req.headers.authorization;
+      headers.Authorization =
+        req.headers.authorization;
     }
 
     if (req.headers["content-type"]) {
-      headers["Content-Type"] = req.headers["content-type"];
+      headers["Content-Type"] =
+        req.headers["content-type"];
     }
 
     if (req.headers["content-length"]) {
-      headers["Content-Length"] = req.headers["content-length"];
+      headers["Content-Length"] =
+        req.headers["content-length"];
     }
 
     // -----------------------------------------
@@ -56,31 +61,23 @@ export default async function handler(req, res) {
     const options = {
       method: req.method,
       headers,
+      duplex: "half",
     };
 
     // -----------------------------------------
-    // FORWARD RAW BODY
+    // FORWARD BODY
     // -----------------------------------------
-    //
-    // IMPORTANT:
-    // Do NOT JSON.stringify(req.body).
-    //
-    // This allows multipart/form-data and
-    // IFormFile uploads to pass through.
-    //
 
     if (!["GET", "HEAD"].includes(req.method)) {
       options.body = req;
-
-      // Required by Node.js fetch when sending
-      // a streaming request body.
-      options.duplex = "half";
     }
 
-    console.log("Sending request to backend...");
+    console.log(
+      "Sending request to backend..."
+    );
 
     // -----------------------------------------
-    // CALL ASP.NET BACKEND
+    // CALL BACKEND
     // -----------------------------------------
 
     const response = await fetch(
@@ -94,7 +91,7 @@ export default async function handler(req, res) {
     );
 
     // -----------------------------------------
-    // FORWARD RESPONSE CONTENT TYPE
+    // RESPONSE HEADERS
     // -----------------------------------------
 
     const contentType =
@@ -107,11 +104,25 @@ export default async function handler(req, res) {
       );
     }
 
+    // Forward useful headers
+    const contentDisposition =
+      response.headers.get(
+        "content-disposition"
+      );
+
+    if (contentDisposition) {
+      res.setHeader(
+        "Content-Disposition",
+        contentDisposition
+      );
+    }
+
     // -----------------------------------------
     // RETURN BACKEND RESPONSE
     // -----------------------------------------
 
-    const data = await response.arrayBuffer();
+    const data =
+      await response.arrayBuffer();
 
     return res
       .status(response.status)
@@ -133,7 +144,8 @@ export default async function handler(req, res) {
     );
 
     return res.status(502).json({
-      error: "Project Officers proxy failed",
+      error:
+        "Project Officers proxy failed",
       details: error.message,
     });
   }
