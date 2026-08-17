@@ -8,7 +8,7 @@ const BACKEND_URL = "https://id-management-api.runasp.net";
 
 export default async function handler(req, res) {
   console.log("=================================");
-  console.log("🔥 PROJECT OFFICERS VERCEL FUNCTION HIT");
+  console.log("🔥 PROJECT OFFICERS VERCEL PROXY");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
   console.log("=================================");
@@ -19,13 +19,23 @@ export default async function handler(req, res) {
       `https://${req.headers.host}`
     );
 
-    // Remove /api/ProjectOfficers/ from the URL
+    /*
+     * Example:
+     *
+     * /api/ProjectOfficers/157
+     *        ↓
+     * 157
+     *
+     * /api/ProjectOfficers/157/image
+     *        ↓
+     * 157/image
+     */
+
     const targetPath = url.pathname.replace(
       /^\/api\/ProjectOfficers\/?/i,
       ""
     );
 
-    // Build backend URL
     const backendUrl = targetPath
       ? `${BACKEND_URL}/api/ProjectOfficers/${targetPath}${url.search}`
       : `${BACKEND_URL}/api/ProjectOfficers${url.search}`;
@@ -61,7 +71,6 @@ export default async function handler(req, res) {
     const options = {
       method: req.method,
       headers,
-      duplex: "half",
     };
 
     // -----------------------------------------
@@ -70,14 +79,13 @@ export default async function handler(req, res) {
 
     if (!["GET", "HEAD"].includes(req.method)) {
       options.body = req;
+      options.duplex = "half";
     }
 
-    console.log(
-      "Sending request to backend..."
-    );
+    console.log("Sending request to backend...");
 
     // -----------------------------------------
-    // CALL BACKEND
+    // BACKEND REQUEST
     // -----------------------------------------
 
     const response = await fetch(
@@ -104,7 +112,6 @@ export default async function handler(req, res) {
       );
     }
 
-    // Forward useful headers
     const contentDisposition =
       response.headers.get(
         "content-disposition"
@@ -114,6 +121,16 @@ export default async function handler(req, res) {
       res.setHeader(
         "Content-Disposition",
         contentDisposition
+      );
+    }
+
+    const contentLength =
+      response.headers.get("content-length");
+
+    if (contentLength) {
+      res.setHeader(
+        "Content-Length",
+        contentLength
       );
     }
 
@@ -129,23 +146,13 @@ export default async function handler(req, res) {
       .send(Buffer.from(data));
 
   } catch (error) {
-    console.error(
-      "================================="
-    );
-
-    console.error(
-      "🔥 PROJECT OFFICERS PROXY ERROR"
-    );
-
+    console.error("=================================");
+    console.error("🔥 PROJECT OFFICERS PROXY ERROR");
     console.error(error);
-
-    console.error(
-      "================================="
-    );
+    console.error("=================================");
 
     return res.status(502).json({
-      error:
-        "Project Officers proxy failed",
+      error: "Project Officers proxy failed",
       details: error.message,
     });
   }
