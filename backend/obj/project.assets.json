@@ -60,6 +60,39 @@
           }
         }
       },
+      "ClosedXML/0.105.1": {
+        "type": "package",
+        "dependencies": {
+          "ClosedXML.Parser": "2.0.0",
+          "DocumentFormat.OpenXml": "[3.1.1, 4.0.0)",
+          "ExcelNumberFormat": "1.1.0",
+          "RBush.Signed": "4.0.0",
+          "SixLabors.Fonts": "[1.0.0, 3.0.0)"
+        },
+        "compile": {
+          "lib/netstandard2.1/ClosedXML.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/ClosedXML.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "ClosedXML.Parser/2.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/ClosedXML.Parser.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/ClosedXML.Parser.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "DocumentFormat.OpenXml/3.5.1": {
         "type": "package",
         "dependencies": {
@@ -104,6 +137,19 @@
         },
         "runtime": {
           "lib/netstandard2.0/DotNetEnv.dll": {}
+        }
+      },
+      "ExcelNumberFormat/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/ExcelNumberFormat.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/ExcelNumberFormat.dll": {
+            "related": ".xml"
+          }
         }
       },
       "FastReport.Compat/2026.2.3": {
@@ -1497,64 +1543,6 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
-      "OpenCvSharp4/4.13.0.20260627": {
-        "type": "package",
-        "dependencies": {
-          "System.Memory": "4.6.3"
-        },
-        "compile": {
-          "lib/net8.0/OpenCvSharp.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/OpenCvSharp.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "OpenCvSharp4.runtime.win/4.13.0.20260627": {
-        "type": "package",
-        "build": {
-          "build/net8.0/OpenCvSharp4.runtime.win.props": {},
-          "build/net8.0/OpenCvSharp4.runtime.win.targets": {}
-        },
-        "runtimeTargets": {
-          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          },
-          "runtimes/win-x64/native/opencv_videoio_ffmpeg4130_64.dll": {
-            "assetType": "native",
-            "rid": "win-x64"
-          }
-        }
-      },
-      "OpenCvSharp4.Windows/4.13.0.20260627": {
-        "type": "package",
-        "dependencies": {
-          "OpenCvSharp4": "4.13.0.20260627",
-          "OpenCvSharp4.WpfExtensions": "4.13.0.20260627",
-          "OpenCvSharp4.runtime.win": "4.13.0.20260627"
-        }
-      },
-      "OpenCvSharp4.WpfExtensions/4.13.0.20260627": {
-        "type": "package",
-        "dependencies": {
-          "OpenCvSharp4": "4.13.0.20260627",
-          "System.Drawing.Common": "10.0.9"
-        },
-        "compile": {
-          "lib/net48/OpenCvSharp.WpfExtensions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net48/OpenCvSharp.WpfExtensions.dll": {
-            "related": ".xml"
-          }
-        }
-      },
       "QuestPDF/2026.7.1": {
         "type": "package",
         "compile": {
@@ -1634,6 +1622,19 @@
           "runtimes/win-x86/native/qpdf.dll": {
             "assetType": "native",
             "rid": "win-x86"
+          }
+        }
+      },
+      "RBush.Signed/4.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/RBush.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/RBush.dll": {
+            "related": ".xml"
           }
         }
       },
@@ -1805,6 +1806,19 @@
           "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so": {
             "assetType": "native",
             "rid": "ubuntu.16.10-x64"
+          }
+        }
+      },
+      "SixLabors.Fonts/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/netcoreapp3.1/SixLabors.Fonts.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netcoreapp3.1/SixLabors.Fonts.dll": {
+            "related": ".xml"
           }
         }
       },
@@ -2523,10 +2537,10 @@
           "lib/netstandard1.6/System.Linq.Expressions.dll": {}
         }
       },
-      "System.Memory/4.6.3": {
+      "System.Memory/4.5.5": {
         "type": "package",
         "compile": {
-          "lib/netcoreapp2.1/_._": {}
+          "ref/netcoreapp2.1/_._": {}
         },
         "runtime": {
           "lib/netcoreapp2.1/_._": {}
@@ -3579,6 +3593,40 @@
         "packageIcon.png"
       ]
     },
+    "ClosedXML/0.105.1": {
+      "sha512": "X1ruIP9h2FBEK7jmO0peq3s6/Zqt5ve5a9f9kn6WUjdsUWvGbQlqxuGLz822xuFLlmnSeAfWFTGeX/tZlmAt+g==",
+      "type": "package",
+      "path": "closedxml/0.105.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "closedxml.0.105.1.nupkg.sha512",
+        "closedxml.nuspec",
+        "lib/netstandard2.0/ClosedXML.dll",
+        "lib/netstandard2.0/ClosedXML.pdb",
+        "lib/netstandard2.0/ClosedXML.xml",
+        "lib/netstandard2.1/ClosedXML.dll",
+        "lib/netstandard2.1/ClosedXML.pdb",
+        "lib/netstandard2.1/ClosedXML.xml",
+        "nuget-logo.png"
+      ]
+    },
+    "ClosedXML.Parser/2.0.0": {
+      "sha512": "ngTqjYreDYNytG1W5d3ewHsw0ukmmrgV7EKnS4/40rXoYZGt07jrBvo+N+GxT49rcageUMUiprV0jYT4nwVBHQ==",
+      "type": "package",
+      "path": "closedxml.parser/2.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "closedxml.parser.2.0.0.nupkg.sha512",
+        "closedxml.parser.nuspec",
+        "lib/netstandard2.0/ClosedXML.Parser.dll",
+        "lib/netstandard2.0/ClosedXML.Parser.xml",
+        "lib/netstandard2.1/ClosedXML.Parser.dll",
+        "lib/netstandard2.1/ClosedXML.Parser.xml"
+      ]
+    },
     "DocumentFormat.OpenXml/3.5.1": {
       "sha512": "zxdOf5VVCe/uNklbRhj8dVBzQGj3DoqkUuqOp9cAZVuN8mNYDjof1lvSQA2OQNr8Ptc9d7pbA7Azq/ReaI3FpA==",
       "type": "package",
@@ -3643,6 +3691,24 @@
         "dotnetenv.3.2.0.nupkg.sha512",
         "dotnetenv.nuspec",
         "lib/netstandard2.0/DotNetEnv.dll"
+      ]
+    },
+    "ExcelNumberFormat/1.1.0": {
+      "sha512": "R3BVHPs9O+RkExbZYTGT0+9HLbi8ZrNij1Yziyw6znd3J7P3uoIR07uwTLGOogtz1p6+0sna66eBoXu7tBiVQA==",
+      "type": "package",
+      "path": "excelnumberformat/1.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "excelnumberformat.1.1.0.nupkg.sha512",
+        "excelnumberformat.nuspec",
+        "icon.png",
+        "lib/net20/ExcelNumberFormat.dll",
+        "lib/net20/ExcelNumberFormat.xml",
+        "lib/netstandard1.0/ExcelNumberFormat.dll",
+        "lib/netstandard1.0/ExcelNumberFormat.xml",
+        "lib/netstandard2.0/ExcelNumberFormat.dll",
+        "lib/netstandard2.0/ExcelNumberFormat.xml"
       ]
     },
     "FastReport.Compat/2026.2.3": {
@@ -6202,77 +6268,6 @@
         "netstandard.library.nuspec"
       ]
     },
-    "OpenCvSharp4/4.13.0.20260627": {
-      "sha512": "nYk95jkyYY9f0sF5KqZ3OB1SWkmqsfV7eN0ROiQds/rxpSn0v1G0QIedMbwuqbdPhvQnOIG2DDmpkLnHEJMh8Q==",
-      "type": "package",
-      "path": "opencvsharp4/4.13.0.20260627",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.managed.md",
-        "analyzers/dotnet/cs/OpenCvSharp.Analyzers.dll",
-        "lib/net8.0/OpenCvSharp.dll",
-        "lib/net8.0/OpenCvSharp.xml",
-        "lib/netstandard2.0/OpenCvSharp.dll",
-        "lib/netstandard2.0/OpenCvSharp.xml",
-        "lib/netstandard2.1/OpenCvSharp.dll",
-        "lib/netstandard2.1/OpenCvSharp.xml",
-        "opencvsharp.png",
-        "opencvsharp4.4.13.0.20260627.nupkg.sha512",
-        "opencvsharp4.nuspec"
-      ]
-    },
-    "OpenCvSharp4.runtime.win/4.13.0.20260627": {
-      "sha512": "POIxR+CTpwHJIdam6wd8U2fprWv5QnIUw50jw79WEGb37He3T1h11SdtwSj9p2PLSfrzonMjO2t71wqi5uFsoQ==",
-      "type": "package",
-      "path": "opencvsharp4.runtime.win/4.13.0.20260627",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.runtime.md",
-        "build/net8.0/OpenCvSharp4.runtime.win.props",
-        "build/net8.0/OpenCvSharp4.runtime.win.targets",
-        "build/netcoreapp/OpenCvSharp4.runtime.win.props",
-        "build/netcoreapp/OpenCvSharp4.runtime.win.targets",
-        "build/netstandard/OpenCvSharp4.runtime.win.props",
-        "build/netstandard/OpenCvSharp4.runtime.win.targets",
-        "opencvsharp.png",
-        "opencvsharp4.runtime.win.4.13.0.20260627.nupkg.sha512",
-        "opencvsharp4.runtime.win.nuspec",
-        "runtimes/win-x64/native/OpenCvSharpExtern.dll",
-        "runtimes/win-x64/native/opencv_videoio_ffmpeg4130_64.dll"
-      ]
-    },
-    "OpenCvSharp4.Windows/4.13.0.20260627": {
-      "sha512": "YYJAej4HZYPmN+fG2MCUFDZ/hxsb66PJxAxKuVLFolysGl6opszhILRT2NO/ZEagnlqZ3mlUYGiOjCN0Jj276A==",
-      "type": "package",
-      "path": "opencvsharp4.windows/4.13.0.20260627",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.managed.md",
-        "opencvsharp.png",
-        "opencvsharp4.windows.4.13.0.20260627.nupkg.sha512",
-        "opencvsharp4.windows.nuspec"
-      ]
-    },
-    "OpenCvSharp4.WpfExtensions/4.13.0.20260627": {
-      "sha512": "6cxOJWTuwUGFPgeyrjCQGVtulK25ej1G6f+wW5fVUrgPSNKlUCOOpPAkgq1kHFJ22mNJAlIR8OrKpafBtS8kCA==",
-      "type": "package",
-      "path": "opencvsharp4.wpfextensions/4.13.0.20260627",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.managed.md",
-        "lib/net48/OpenCvSharp.WpfExtensions.dll",
-        "lib/net48/OpenCvSharp.WpfExtensions.xml",
-        "lib/net8.0-windows7.0/OpenCvSharp.WpfExtensions.dll",
-        "lib/net8.0-windows7.0/OpenCvSharp.WpfExtensions.xml",
-        "opencvsharp.png",
-        "opencvsharp4.wpfextensions.4.13.0.20260627.nupkg.sha512",
-        "opencvsharp4.wpfextensions.nuspec"
-      ]
-    },
     "QuestPDF/2026.7.1": {
       "sha512": "GsBxQb48dFAGmvI1eP3SHyz0Pua4uH6aUHX7f0ywTin6hordAviZRAiTiIQiKMLwq6hN1FmgS+qLjfh2v7vhOg==",
       "type": "package",
@@ -6353,6 +6348,24 @@
         "runtimes/win-x64/native/qpdf.dll",
         "runtimes/win-x86/native/QuestPdfSkia.dll",
         "runtimes/win-x86/native/qpdf.dll"
+      ]
+    },
+    "RBush.Signed/4.0.0": {
+      "sha512": "aP5KQxL5RnFNGW1f0euYVBfCatkLw5iEzMRJcXKq8LWWP4Cp3+qoSq1tDDL2vvJ2rM0ychmVMa2VaEKLS6uX4w==",
+      "type": "package",
+      "path": "rbush.signed/4.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net47/RBush.dll",
+        "lib/net47/RBush.xml",
+        "lib/net8.0/RBush.dll",
+        "lib/net8.0/RBush.xml",
+        "lib/netstandard2.0/RBush.dll",
+        "lib/netstandard2.0/RBush.xml",
+        "rbush.signed.4.0.0.nupkg.sha512",
+        "rbush.signed.nuspec",
+        "readme.md"
       ]
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
@@ -6577,6 +6590,24 @@
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.nuspec",
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
+      ]
+    },
+    "SixLabors.Fonts/1.0.0": {
+      "sha512": "LFQsCZlV0xlUyXAOMUo5kkSl+8zAQXXbbdwWchtk0B4o7zotZhQsQOcJUELGHdfPfm/xDAsz6hONAuV25bJaAg==",
+      "type": "package",
+      "path": "sixlabors.fonts/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netcoreapp3.1/SixLabors.Fonts.dll",
+        "lib/netcoreapp3.1/SixLabors.Fonts.xml",
+        "lib/netstandard2.0/SixLabors.Fonts.dll",
+        "lib/netstandard2.0/SixLabors.Fonts.xml",
+        "lib/netstandard2.1/SixLabors.Fonts.dll",
+        "lib/netstandard2.1/SixLabors.Fonts.xml",
+        "sixlabors.fonts.1.0.0.nupkg.sha512",
+        "sixlabors.fonts.128.png",
+        "sixlabors.fonts.nuspec"
       ]
     },
     "SixLabors.ImageSharp/3.1.3": {
@@ -8191,25 +8222,27 @@
         "system.linq.expressions.nuspec"
       ]
     },
-    "System.Memory/4.6.3": {
-      "sha512": "qdcDOgnFZY40+Q9876JUHnlHu7bosOHX8XISRoH94fwk6hgaeQGSgfZd8srWRZNt5bV9ZW2TljcegDNxsf+96A==",
+    "System.Memory/4.5.5": {
+      "sha512": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw==",
       "type": "package",
-      "path": "system.memory/4.6.3",
+      "path": "system.memory/4.5.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
-        "PACKAGE.md",
-        "buildTransitive/net461/System.Memory.targets",
-        "buildTransitive/net462/_._",
-        "lib/net462/System.Memory.dll",
-        "lib/net462/System.Memory.xml",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net461/System.Memory.dll",
+        "lib/net461/System.Memory.xml",
         "lib/netcoreapp2.1/_._",
+        "lib/netstandard1.1/System.Memory.dll",
+        "lib/netstandard1.1/System.Memory.xml",
         "lib/netstandard2.0/System.Memory.dll",
         "lib/netstandard2.0/System.Memory.xml",
-        "lib/netstandard2.1/_._",
-        "system.memory.4.6.3.nupkg.sha512",
-        "system.memory.nuspec"
+        "ref/netcoreapp2.1/_._",
+        "system.memory.4.5.5.nupkg.sha512",
+        "system.memory.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
       ]
     },
     "System.Memory.Data/1.0.2": {
@@ -10763,6 +10796,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "ClosedXML >= 0.105.1",
       "DocumentFormat.OpenXml >= 3.5.1",
       "DotNetEnv >= 3.2.0",
       "FastReport.OpenSource >= 2026.2.3",
@@ -10780,9 +10814,6 @@
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.0",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.0",
       "Microsoft.ML.OnnxRuntime >= 1.28.0",
-      "OpenCvSharp4 >= 4.13.0.20260627",
-      "OpenCvSharp4.Windows >= 4.13.0.20260627",
-      "OpenCvSharp4.runtime.win >= 4.13.0.20260627",
       "QuestPDF >= 2026.7.1",
       "SixLabors.ImageSharp >= 3.1.3",
       "Swashbuckle.AspNetCore >= 6.6.2",
@@ -10796,11 +10827,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectUniqueName": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "projectName": "backend",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\obj\\",
+      "outputPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -10835,6 +10866,10 @@
         "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
+          "ClosedXML": {
+            "target": "Package",
+            "version": "[0.105.1, )"
+          },
           "DocumentFormat.OpenXml": {
             "target": "Package",
             "version": "[3.5.1, )"
@@ -10906,18 +10941,6 @@
           "Microsoft.ML.OnnxRuntime": {
             "target": "Package",
             "version": "[1.28.0, )"
-          },
-          "OpenCvSharp4": {
-            "target": "Package",
-            "version": "[4.13.0.20260627, )"
-          },
-          "OpenCvSharp4.Windows": {
-            "target": "Package",
-            "version": "[4.13.0.20260627, )"
-          },
-          "OpenCvSharp4.runtime.win": {
-            "target": "Package",
-            "version": "[4.13.0.20260627, )"
           },
           "QuestPDF": {
             "target": "Package",
@@ -11038,16 +11061,6 @@
       "warningLevel": 1,
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc",
       "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'OpenCvSharp4.WpfExtensions 4.13.0.20260627' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
-      "libraryId": "OpenCvSharp4.WpfExtensions",
       "targetGraphs": [
         "net8.0"
       ]

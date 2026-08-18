@@ -26,9 +26,12 @@ c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Azure.Core.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Azure.Identity.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\BouncyCastle.Cryptography.dll
+c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\ClosedXML.dll
+c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\ClosedXML.Parser.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\DocumentFormat.OpenXml.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\DocumentFormat.OpenXml.Framework.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\DotNetEnv.dll
+c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\ExcelNumberFormat.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\FastReport.Compat.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\FastReport.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Humanizer.dll
@@ -76,9 +79,9 @@ c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Microsoft.SqlServer.Server.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Microsoft.Win32.SystemEvents.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\MimeKit.dll
-c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\OpenCvSharp.dll
-c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\OpenCvSharp.WpfExtensions.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\QuestPDF.dll
+c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\RBush.dll
+c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\SixLabors.Fonts.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\SixLabors.ImageSharp.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Superpower.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.Swagger.dll
@@ -208,8 +211,6 @@ c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\win-x64\native\onnxruntime_providers_shared.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\win-x64\native\onnxruntime_providers_shared.lib
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\win\lib\net8.0\Microsoft.Win32.SystemEvents.dll
-c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\win-x64\native\OpenCvSharpExtern.dll
-c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\win-x64\native\opencv_videoio_ffmpeg4130_64.dll
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\linux-arm64\native\libQuestPdfSkia.so
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\linux-arm64\native\libqpdf.so
 c:\Users\acer\OneDrive\Desktop\theo\new\id_management\backend\bin\Release\net8.0\publish\runtimes\linux-musl-x64\native\libQuestPdfSkia.so

@@ -1,15 +1,18 @@
 {
   "version": 2,
-  "dgSpecHash": "Crz+T4OEc44=",
+  "dgSpecHash": "aWlgtDPLFi0=",
   "success": true,
-  "projectFilePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+  "projectFilePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\acer\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\closedxml\\0.105.1\\closedxml.0.105.1.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\closedxml.parser\\2.0.0\\closedxml.parser.2.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\documentformat.openxml\\3.5.1\\documentformat.openxml.3.5.1.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\documentformat.openxml.framework\\3.5.1\\documentformat.openxml.framework.3.5.1.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\dotnetenv\\3.2.0\\dotnetenv.3.2.0.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\excelnumberformat\\1.1.0\\excelnumberformat.1.1.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\fastreport.compat\\2026.2.3\\fastreport.compat.2026.2.3.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\fastreport.opensource\\2026.2.3\\fastreport.opensource.2026.2.3.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -72,11 +75,8 @@
     "C:\\Users\\acer\\.nuget\\packages\\mimekit\\4.17.0\\mimekit.4.17.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
-    "C:\\Users\\acer\\.nuget\\packages\\opencvsharp4\\4.13.0.20260627\\opencvsharp4.4.13.0.20260627.nupkg.sha512",
-    "C:\\Users\\acer\\.nuget\\packages\\opencvsharp4.runtime.win\\4.13.0.20260627\\opencvsharp4.runtime.win.4.13.0.20260627.nupkg.sha512",
-    "C:\\Users\\acer\\.nuget\\packages\\opencvsharp4.windows\\4.13.0.20260627\\opencvsharp4.windows.4.13.0.20260627.nupkg.sha512",
-    "C:\\Users\\acer\\.nuget\\packages\\opencvsharp4.wpfextensions\\4.13.0.20260627\\opencvsharp4.wpfextensions.4.13.0.20260627.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\questpdf\\2026.7.1\\questpdf.2026.7.1.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\rbush.signed\\4.0.0\\rbush.signed.4.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
@@ -93,6 +93,7 @@
     "C:\\Users\\acer\\.nuget\\packages\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\sixlabors.fonts\\1.0.0\\sixlabors.fonts.1.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\sixlabors.imagesharp\\3.1.3\\sixlabors.imagesharp.3.1.3.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\superpower\\3.0.0\\superpower.3.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\swashbuckle.aspnetcore\\6.6.2\\swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
@@ -133,7 +134,7 @@
     "C:\\Users\\acer\\.nuget\\packages\\system.io.pipelines\\9.0.0\\system.io.pipelines.9.0.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\system.linq\\4.3.0\\system.linq.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\system.linq.expressions\\4.3.0\\system.linq.expressions.4.3.0.nupkg.sha512",
-    "C:\\Users\\acer\\.nuget\\packages\\system.memory\\4.6.3\\system.memory.4.6.3.nupkg.sha512",
+    "C:\\Users\\acer\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\system.memory.data\\1.0.2\\system.memory.data.1.0.2.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\system.net.http\\4.3.0\\system.net.http.4.3.0.nupkg.sha512",
     "C:\\Users\\acer\\.nuget\\packages\\system.net.primitives\\4.3.0\\system.net.primitives.4.3.0.nupkg.sha512",
@@ -194,9 +195,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-2cmq-823j-5qj8",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net8.0"
@@ -206,9 +207,9 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-5x7m-6737-26cr",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net8.0"
@@ -218,9 +219,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known high severity vulnerability, https://github.com/advisories/GHSA-63p8-c4ww-9cg7",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net8.0"
@@ -230,9 +231,9 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-g85r-6x2q-45w7",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net8.0"
@@ -242,9 +243,9 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-qxrv-gp6x-rc23",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
       "targetGraphs": [
         "net8.0"
@@ -254,22 +255,10 @@
       "code": "NU1902",
       "level": "Warning",
       "message": "Package 'SixLabors.ImageSharp' 3.1.3 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-rxmq-m78w-7wmc",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "filePath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "libraryId": "SixLabors.ImageSharp",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1701",
-      "level": "Warning",
-      "message": "Package 'OpenCvSharp4.WpfExtensions 4.13.0.20260627' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
-      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
-      "warningLevel": 1,
-      "filePath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
-      "libraryId": "OpenCvSharp4.WpfExtensions",
       "targetGraphs": [
         "net8.0"
       ]

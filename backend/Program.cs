@@ -83,7 +83,9 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:5173",
-            "https://id-management-silk.vercel.app"
+            "https://nia-id-management-silk.vercel.app",
+            "https://id-management-git-main-thei1.vercel.app",
+            "https://id-management-thei1.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod();
