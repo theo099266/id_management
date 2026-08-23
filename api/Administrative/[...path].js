@@ -5,11 +5,11 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log("=================================");
-  console.log("🔥 ADMINISTRATIVE VERCEL FUNCTION HIT");
+  
+  console.log(" ADMINISTRATIVE VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
-  console.log("=================================");
+  
 
   try {
     const url = new URL(

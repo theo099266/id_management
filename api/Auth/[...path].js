@@ -9,11 +9,11 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log("=================================");
-  console.log("🔥 AUTH VERCEL FUNCTION HIT");
+  
+  console.log(" AUTH VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
-  console.log("=================================");
+  
 
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
@@ -70,9 +70,7 @@ export default async function handler(req, res) {
 
     res.status(response.status).send(data);
   } catch (error) {
-    console.error("=================================");
     console.error("AUTH PROXY ERROR:", error);
-    console.error("=================================");
 
     res.status(502).json({
       error: "Auth proxy failed",

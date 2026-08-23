@@ -5,11 +5,11 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log("=================================");
-  console.log("🔥 PROJECT OFFICERS VERCEL FUNCTION HIT");
+  
+  console.log(" PROJECT OFFICERS VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
-  console.log("=================================");
+  
 
   try {
     const url = new URL(
@@ -31,9 +31,9 @@ export default async function handler(req, res) {
     console.log("Target Path:", targetPath);
     console.log("Backend:", backendUrl);
 
-    // -----------------------------------------
+    
     // FORWARD HEADERS
-    // -----------------------------------------
+    
 
     const headers = {};
 
@@ -49,18 +49,18 @@ export default async function handler(req, res) {
       headers["Content-Length"] = req.headers["content-length"];
     }
 
-    // -----------------------------------------
+    
     // REQUEST OPTIONS
-    // -----------------------------------------
+    
 
     const options = {
       method: req.method,
       headers,
     };
 
-    // -----------------------------------------
+    
     // FORWARD RAW BODY
-    // -----------------------------------------
+    
     //
     // IMPORTANT:
     // Do NOT JSON.stringify(req.body).
@@ -79,9 +79,9 @@ export default async function handler(req, res) {
 
     console.log("Sending request to backend...");
 
-    // -----------------------------------------
+    
     // CALL ASP.NET BACKEND
-    // -----------------------------------------
+    
 
     const response = await fetch(
       backendUrl,
@@ -93,9 +93,9 @@ export default async function handler(req, res) {
       response.status
     );
 
-    // -----------------------------------------
+    
     // FORWARD RESPONSE CONTENT TYPE
-    // -----------------------------------------
+    
 
     const contentType =
       response.headers.get("content-type");
@@ -107,9 +107,9 @@ export default async function handler(req, res) {
       );
     }
 
-    // -----------------------------------------
+    
     // RETURN BACKEND RESPONSE
-    // -----------------------------------------
+    
 
     const data = await response.arrayBuffer();
 
@@ -118,19 +118,13 @@ export default async function handler(req, res) {
       .send(Buffer.from(data));
 
   } catch (error) {
-    console.error(
-      "================================="
-    );
 
     console.error(
-      "🔥 PROJECT OFFICERS PROXY ERROR"
+      " PROJECT OFFICERS PROXY ERROR"
     );
 
     console.error(error);
 
-    console.error(
-      "================================="
-    );
 
     return res.status(502).json({
       error: "Project Officers proxy failed",

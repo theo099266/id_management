@@ -1,6 +1,4 @@
-// IMPORTANT:
-// Disable Vercel's automatic body parser.
-// Needed so multipart/form-data (PUT with image upload) passes through untouched.
+
 export const config = {
   api: {
     bodyParser: false,
@@ -8,17 +6,15 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log("=================================");
-  console.log("🔥 USERS VERCEL FUNCTION HIT");
+  
+  console.log(" USERS VERCEL FUNCTION HIT");
   console.log("Method:", req.method);
   console.log("URL:", req.url);
-  console.log("=================================");
+  
 
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
 
-    // /api/users/2  -> "2"
-    // /api/users    -> ""
     const targetPath = url.pathname.replace(/^\/api\/users\/?/i, "");
 
     const backendUrl =
@@ -84,9 +80,7 @@ export default async function handler(req, res) {
 
     res.status(response.status).send(data);
   } catch (error) {
-    console.error("=================================");
     console.error("USERS PROXY ERROR:", error);
-    console.error("=================================");
 
     res.status(502).json({
       error: "Users proxy failed",

@@ -11,10 +11,6 @@ const CONTROLLER_CASE_MAP = {
 
 const BACKEND_URL = "https://id-management-api.runasp.net";
 
-// IMPORTANT:
-// Disable Vercel's automatic body parser.
-// We need to forward the original request stream
-// for multipart/form-data uploads.
 export const config = {
   api: {
     bodyParser: false,
@@ -23,11 +19,11 @@ export const config = {
 
 export default async function handler(req, res) {
   try {
-    console.log("=================================");
+    
     console.log("VERCEL PROXY");
     console.log("Method:", req.method);
     console.log("URL:", req.url);
-    console.log("=================================");
+    
 
     const url = new URL(req.url, `https://${req.headers.host}`);
 
@@ -38,13 +34,13 @@ export default async function handler(req, res) {
 
     console.log("Target path:", targetPath);
 
-    // ============================================================
+  
     // UPLOADS
     // /api/uploads/profiles/file.jpg
     //
     // becomes:
     // https://id-management-api.runasp.net/uploads/profiles/file.jpg
-    // ============================================================
+  
 
     const isUploadsPath =
       targetPath.toLowerCase() === "uploads" ||
@@ -65,9 +61,9 @@ export default async function handler(req, res) {
       console.log("Backend:", backendUrl);
     }
 
-    // ============================================================
+  
     // NORMAL API REQUESTS
-    // ============================================================
+  
 
     else {
       const segments = targetPath.split("/");
@@ -89,9 +85,9 @@ export default async function handler(req, res) {
       console.log("Backend:", backendUrl);
     }
 
-    // ============================================================
+  
     // HEADERS
-    // ============================================================
+  
 
     const headers = {};
 
@@ -111,9 +107,9 @@ export default async function handler(req, res) {
   headers["Content-Length"] = req.headers["content-length"];
 }
 
-    // ============================================================
+  
     // REQUEST OPTIONS
-    // ============================================================
+  
 
     const options = {
   method: req.method,
@@ -121,9 +117,9 @@ export default async function handler(req, res) {
   duplex: "half",
 };
 
-    // ============================================================
+  
     // FORWARD ORIGINAL REQUEST BODY
-    // ============================================================
+  
     //
     // DO NOT use JSON.stringify(req.body).
     //
@@ -142,9 +138,8 @@ export default async function handler(req, res) {
       options.body = req;
     }
 
-    // ============================================================
-    // CALL BACKEND
-    // ============================================================
+  
+  
 
     console.log(
       "Sending request to:",
@@ -169,9 +164,9 @@ export default async function handler(req, res) {
       );
     }
 
-    // ============================================================
+  
     // IMAGE / FILE RESPONSE
-    // ============================================================
+  
 
     if (
       contentType &&
@@ -192,9 +187,9 @@ export default async function handler(req, res) {
         .send(buffer);
     }
 
-    // ============================================================
+  
     // NORMAL JSON / TEXT RESPONSE
-    // ============================================================
+  
 
     const data =
       await response.text();
@@ -209,18 +204,14 @@ export default async function handler(req, res) {
       .send(data);
 
   } catch (error) {
-    console.error(
-      "================================="
-    );
+
 
     console.error(
       "VERCEL PROXY ERROR:",
       error
     );
 
-    console.error(
-      "================================="
-    );
+
 
     return res.status(502).json({
       error: "Proxy request failed",
