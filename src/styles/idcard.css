@@ -66,6 +66,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  letter-spacing: 0.02em;
   font-family: Impact, 'Arial Narrow', sans-serif;
   font-size: var(--name-font-size);
   margin: 0.4em 0 0;
@@ -154,9 +155,12 @@
   display: inline-flex;
   align-items: flex-start;
   justify-content: center;
-  transform: scale(1.8);
   transform-origin: center top;
   margin: 0 12px;
+}
+.id-zoom-shell .id-preview {
+  --card-w: calc(5.4cm * 1.8);
+  --card-h: calc(8.56cm * 1.8);
 }
 .id-preview {
     position: relative;
