@@ -502,19 +502,49 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
           {resolvedImages.loading ? (
             <div className="text-center py-5">Loading images...</div>
           ) : (
-            <div
+             <div
               className="id-container"
-              style={{ minHeight: "620px", paddingTop: "8px" }}
+              style={{
+                minHeight: "620px",
+                paddingTop: "8px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "40px",
+                flexWrap: "wrap",
+              }}
             >
-              <div className="id-zoom-shell">
-  <div className="id-preview">
-    <FrontID employee={finalEmployeeData} svgRef={frontRef} />
-  </div>
-</div>
-
-              <div className="id-zoom-shell">
+              {/* LEFT — FRONT ID */}
+              <div
+                className="id-zoom-shell"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <div className="id-preview">
-                  <BackID employee={finalEmployeeData} svgRef={backRef} />
+                  <FrontID
+                    employee={finalEmployeeData}
+                    svgRef={frontRef}
+                  />
+                </div>
+              </div>
+            
+              {/* RIGHT — BACK ID */}
+              <div
+                className="id-zoom-shell"
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <div className="id-preview">
+                  <BackID
+                    employee={finalEmployeeData}
+                    svgRef={backRef}
+                  />
                 </div>
               </div>
             </div>
