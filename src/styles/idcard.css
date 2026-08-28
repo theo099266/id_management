@@ -148,7 +148,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 200px;
+  gap: 40px;
   flex-wrap: wrap;
 }
 .id-zoom-shell {

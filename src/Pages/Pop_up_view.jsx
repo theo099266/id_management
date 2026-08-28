@@ -388,7 +388,7 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
         className="bg-white shadow-xl popup-scrollbar"
         style={{
           width: "90%",
-          maxWidth: "1000px",
+          maxWidth: "1200px",
           maxHeight: "96vh",
           overflowY: "auto",
           borderRadius: "22px",
