@@ -307,6 +307,7 @@ const getImageUrl = (path) => {
   const exportStyles = {
     ".employee-photo": { transform: "translateY(0px)" },
     ".employee-signature": { transform: "translateY(4.5px)" },
+    ".name-lines": { letterSpacing: "0.04em" },
     ".employee-office": { marginTop: "4px"},
     ".info-column": { transform: "translateY(-6px)" },
   };
@@ -348,7 +349,7 @@ const getImageUrl = (path) => {
 };
 
   const handleDownloadFront = (frontRef, finalEmployeeData) =>
-  downloadHtmlAsJpg(
+  downloadSvgAsJpg(
     frontRef,
     `${finalEmployeeData.name || "employee"}_front.jpg`,
     { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) },
@@ -364,11 +365,11 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
   const handleDownloadBoth = async (frontRef, backRef, finalEmployeeData) => {
   const dims = { outWidth: cmToPx(CARD_W_CM), outHeight: cmToPx(CARD_H_CM) };
 
-  await downloadHtmlAsJpg(
-    frontRef,
-    `${finalEmployeeData.name || "employee"}_front.jpg`,
-    dims,
-  );
+  await downloadSvgAsJpg(
+  frontRef,
+  `${finalEmployeeData.name || "employee"}_front.jpg`,
+  dims,
+);
   await downloadSvgAsJpg(
     backRef,
     `${finalEmployeeData.name || "employee"}_back.jpg`,
@@ -506,10 +507,10 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
               style={{ minHeight: "620px", paddingTop: "8px" }}
             >
               <div className="id-zoom-shell">
-                <div className="id-preview" ref={frontRef}>
-                  <FrontID employee={finalEmployeeData} />
-                </div>
-              </div>
+  <div className="id-preview">
+    <FrontID employee={finalEmployeeData} svgRef={frontRef} />
+  </div>
+</div>
 
               <div className="id-zoom-shell">
                 <div className="id-preview">

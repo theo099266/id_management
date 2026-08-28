@@ -68,8 +68,7 @@
   text-align: center;
   font-family: Impact, 'Arial Narrow', sans-serif;
   font-size: var(--name-font-size);
-  letter-spacing: normal;
-  word-spacing: normal;
+  letter-spacing: 0.06px;
   margin: 0.4em 0 0;
   line-height: 1.05;
   -webkit-font-smoothing: antialiased;
@@ -92,7 +91,6 @@
   margin-top: 0.18em;
   font-family: Arial, sans-serif;
   font-size: var(--office-font-size);
-  word-spacing: normal;
   line-height: 1.2;
   text-align: center;
   width: 100%;
