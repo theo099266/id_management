@@ -158,10 +158,6 @@
   transform-origin: center top;
   margin: 0 12px;
 }
-.id-zoom-shell .id-preview {
-  --card-w: calc(5.4cm * 1.8);
-  --card-h: calc(8.56cm * 1.8);
-}
 .id-preview {
     position: relative;
     width: var(--card-w);

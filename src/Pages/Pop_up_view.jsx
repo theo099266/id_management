@@ -11,6 +11,7 @@ const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
 
   const token = localStorage.getItem("token"); // match however your axios.js stores it
+  const ZOOM = 1.8;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -508,10 +509,14 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
               style={{ minHeight: "620px", paddingTop: "8px" }}
             >
               <div className="id-zoom-shell">
-                <div className="id-preview" ref={frontRef}>
-                  <FrontID employee={finalEmployeeData} />
-                </div>
-              </div>
+  <div
+    className="id-preview"
+    ref={frontRef}
+    style={{ "--card-w": `calc(5.4cm * ${ZOOM})`, "--card-h": `calc(8.56cm * ${ZOOM})` }}
+  >
+    <FrontID employee={finalEmployeeData} />
+  </div>
+</div>
 
               <div className="id-zoom-shell">
                 <div className="id-preview">
