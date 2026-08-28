@@ -11,7 +11,7 @@ const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
 
   const token = localStorage.getItem("token"); // match however your axios.js stores it
-  const ZOOM = 1.8;
+  
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -99,6 +99,7 @@ const resizeProfilePhoto = (src, width = 432, height = 642) =>
 const Pop_up_view = ({ employee, onClose, onEdit }) => {
   const frontRef = useRef(null);
   const backRef = useRef(null);
+  const ZOOM = 1.8;
 
   const [resolvedImages, setResolvedImages] = useState({
     photo: null,
@@ -508,22 +509,31 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
               className="id-container"
               style={{ minHeight: "620px", paddingTop: "8px" }}
             >
-              <div className="id-zoom-shell">
-  <div
-    className="id-preview"
-    ref={frontRef}
-    style={{ "--card-w": `calc(5.4cm * ${ZOOM})`, "--card-h": `calc(8.56cm * ${ZOOM})` }}
-  >
-    <FrontID employee={finalEmployeeData} />
+               <div className="id-zoom-shell">
+    <div
+      className="id-preview"
+      ref={frontRef}
+      style={{
+        "--card-w": `calc(5.4cm * ${ZOOM})`,
+        "--card-h": `calc(8.56cm * ${ZOOM})`,
+      }}
+    >
+      <FrontID employee={finalEmployeeData} />
+    </div>
+  </div>
+
+  <div className="id-zoom-shell">
+    <div
+      className="id-preview"
+      style={{
+        "--card-w": `calc(5.4cm * ${ZOOM})`,
+        "--card-h": `calc(8.56cm * ${ZOOM})`,
+      }}
+    >
+      <BackID employee={finalEmployeeData} svgRef={backRef} />
+    </div>
   </div>
 </div>
-
-              <div className="id-zoom-shell">
-                <div className="id-preview">
-                  <BackID employee={finalEmployeeData} svgRef={backRef} />
-                </div>
-              </div>
-            </div>
           )}
         </div>
       </div>
