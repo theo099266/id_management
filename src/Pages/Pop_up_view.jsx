@@ -11,7 +11,6 @@ const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
 
   const token = localStorage.getItem("token"); // match however your axios.js stores it
-  
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -99,7 +98,6 @@ const resizeProfilePhoto = (src, width = 432, height = 642) =>
 const Pop_up_view = ({ employee, onClose, onEdit }) => {
   const frontRef = useRef(null);
   const backRef = useRef(null);
-  const ZOOM = 1.8;
 
   const [resolvedImages, setResolvedImages] = useState({
     photo: null,
@@ -309,7 +307,7 @@ const getImageUrl = (path) => {
   const exportStyles = {
     ".employee-photo": { transform: "translateY(0px)" },
     ".employee-signature": { transform: "translateY(4.5px)" },
-    ".employee-name": { letterSpacing: "0.8px" },
+    ".employee-name": { letterSpacing: "1px" },
     ".name-lines": { letterSpacing: "normal" }, 
     ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
     ".info-column": { transform: "translateY(-6px)" },
@@ -390,7 +388,7 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
         className="bg-white shadow-xl popup-scrollbar"
         style={{
           width: "90%",
-          maxWidth: "1200px",
+          maxWidth: "1000px",
           maxHeight: "96vh",
           overflowY: "auto",
           borderRadius: "22px",
@@ -509,31 +507,18 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
               className="id-container"
               style={{ minHeight: "620px", paddingTop: "8px" }}
             >
-               <div className="id-zoom-shell">
-    <div
-      className="id-preview"
-      ref={frontRef}
-      style={{
-        "--card-w": `calc(5.4cm * ${ZOOM})`,
-        "--card-h": `calc(8.56cm * ${ZOOM})`,
-      }}
-    >
-      <FrontID employee={finalEmployeeData} />
-    </div>
-  </div>
+              <div className="id-zoom-shell">
+                <div className="id-preview" ref={frontRef}>
+                  <FrontID employee={finalEmployeeData} />
+                </div>
+              </div>
 
-  <div className="id-zoom-shell">
-    <div
-      className="id-preview"
-      style={{
-        "--card-w": `calc(5.4cm * ${ZOOM})`,
-        "--card-h": `calc(8.56cm * ${ZOOM})`,
-      }}
-    >
-      <BackID employee={finalEmployeeData} svgRef={backRef} />
-    </div>
-  </div>
-</div>
+              <div className="id-zoom-shell">
+                <div className="id-preview">
+                  <BackID employee={finalEmployeeData} svgRef={backRef} />
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
