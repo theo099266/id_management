@@ -82,7 +82,7 @@ const signatureY =
   signatureGap;
 const SIGNATURE_WIDTH = 2850;
 const SIGNATURE_HEIGHT = 120;
-const ID_X = 410;
+
 const ID_Y = 757;
   return (
     <svg
@@ -176,7 +176,7 @@ const ID_Y = 757;
 )}
 
         <text
-  x={ID_X}
+  x={NAME_BOX_CENTER_X}
   y={ID_Y}
   textAnchor="middle"
   fontFamily="Arial, sans-serif"

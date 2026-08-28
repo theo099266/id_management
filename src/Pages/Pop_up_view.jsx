@@ -304,18 +304,6 @@ const getImageUrl = (path) => {
 
   document.body.appendChild(clone);
 
-  const exportStyles = {
-    ".employee-photo": { transform: "translateY(0px)" },
-    ".employee-signature": { transform: "translateY(4.5px)" },
-    ".name-lines": { letterSpacing: "0.04em" },
-    ".employee-office": { marginTop: "4px"},
-    ".info-column": { transform: "translateY(-6px)" },
-  };
-  Object.entries(exportStyles).forEach(([selector, css]) => {
-    const element = clone.querySelector(selector);
-    if (!element) return;
-    Object.assign(element.style, css);
-  });
 
   await new Promise((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(resolve)),
