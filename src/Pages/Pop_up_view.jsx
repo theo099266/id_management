@@ -308,6 +308,7 @@ const getImageUrl = (path) => {
     ".employee-photo": { transform: "translateY(0px)" },
     ".employee-signature": { transform: "translateY(4.5px)" },
     ".name-lines": { letterSpacing: "normal" }, 
+    ".employee-name": { letterSpacing: "5px" },
     ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
     ".info-column": { transform: "translateY(-6px)" },
   };

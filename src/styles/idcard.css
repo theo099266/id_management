@@ -67,8 +67,8 @@
   align-items: center;
   text-align: center;
   font-family: Impact, 'Arial Narrow', sans-serif;
-  font-size: 9pt;  
-  letter-spacing: 0.05px;
+  font-size: var(--name-font-size);
+  letter-spacing: 0.08px;
   margin: 0.4em 0 0;
   line-height: 1.05;
   -webkit-font-smoothing: antialiased;
