@@ -307,8 +307,7 @@ const getImageUrl = (path) => {
   const exportStyles = {
     ".employee-photo": { transform: "translateY(0px)" },
     ".employee-signature": { transform: "translateY(4.5px)" },
-     ".name-lines": { letterSpacing: "0.03em" },
-    ".employee-office": { marginTop: "4px", letterSpacing: "normal" },
+    ".employee-office": { marginTop: "4px"},
     ".info-column": { transform: "translateY(-6px)" },
   };
   Object.entries(exportStyles).forEach(([selector, css]) => {

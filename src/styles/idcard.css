@@ -2,7 +2,7 @@
   --card-w: 5.4cm;
   --card-h: 8.56cm;
   --name-font-size: calc(var(--card-w) * 0.080); 
-  --office-font-size: 4pt;
+  --office-font-size: calc(var(--card-w) * 0.026); 
 }
 .template-image {
   width: 100%;
@@ -68,7 +68,8 @@
   text-align: center;
   font-family: Impact, 'Arial Narrow', sans-serif;
   font-size: var(--name-font-size);
-  letter-spacing: 0.05px;
+  letter-spacing: normal;
+  word-spacing: normal;
   margin: 0.4em 0 0;
   line-height: 1.05;
   -webkit-font-smoothing: antialiased;
@@ -91,6 +92,7 @@
   margin-top: 0.18em;
   font-family: Arial, sans-serif;
   font-size: var(--office-font-size);
+  word-spacing: normal;
   line-height: 1.2;
   text-align: center;
   width: 100%;
