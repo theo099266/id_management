@@ -13,7 +13,7 @@ const NAME_BOX_TOP = CARD_H_UNITS * 0.33;       // was .info-column top: 33%
 const NAME_BOX_CENTER_X = NAME_BOX_X + NAME_BOX_WIDTH / 2;
 
 const PHOTO_WIDTH = CARD_W_UNITS * 0.8;         
-const PHOTO_HEIGHT = CARD_H_UNITS * 0.75;      
+const PHOTO_HEIGHT = CARD_H_UNITS * 0.70;      
 const PHOTO_X = CARD_W_UNITS * -0.14;           
 
 const PHOTO_BOTTOM_OFFSET = CARD_H_UNITS * 0.037;

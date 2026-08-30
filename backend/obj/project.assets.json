@@ -10827,11 +10827,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectUniqueName": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "projectName": "backend",
-      "projectPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
+      "projectPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\backend.csproj",
       "packagesPath": "C:\\Users\\acer\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\obj\\",
+      "outputPath": "c:\\Users\\acer\\OneDrive\\Desktop\\theo\\new\\id_management\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\acer\\AppData\\Roaming\\NuGet\\NuGet.Config"

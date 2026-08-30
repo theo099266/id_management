@@ -137,6 +137,10 @@ const getImageUrl = (path) => {
     if (!path) return "";
     return `${BACKEND_URL}/api/signatures/normalized?path=${encodeURIComponent(path)}`;
   };
+  const getNormalizedPhotoUrl = (path) => {
+    if (!path) return "";
+    return `${BACKEND_URL}/api/photos/normalized?path=${encodeURIComponent(path)}`;
+  };
 
   const employeeData = employee
     ? {
@@ -156,7 +160,7 @@ const getImageUrl = (path) => {
           : null,
         issuedDate: employee.issueDate || "",
         expiryDate: employee.expiration_date || "",
-        photo: employee.imagePath ? getImageUrl(employee.imagePath) : null,
+        photo: employee.imagePath ? getNormalizedPhotoUrl(employee.imagePath) : null,
         signature: employee.signaturepath
           ? getNormalizedSignatureUrl(employee.signaturepath)
           : null,
