@@ -12,11 +12,15 @@ using System.Threading.RateLimiting;
 using QuestPDF.Infrastructure;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.AspNetCore.Http.Features;
 DotNetEnv.Env.Load();
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 52_428_800; // 50 MB
+});
 
 
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "127.0.0.1";
@@ -105,6 +109,11 @@ builder.Services.AddAuthorization(options =>
         .RequireAuthenticatedUser()
         .Build();
 });
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 52_428_800; // 50 MB
+});
+
 
 builder.Services.AddRateLimiter(options =>
 {

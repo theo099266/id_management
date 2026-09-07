@@ -862,12 +862,23 @@ namespace Backend.Controllers
             return (h, max <= 0 ? 0 : delta / max, max);
         }
         [HttpGet("export-zip")]
-        public async Task<IActionResult> ExportProjectOfficersZip()
+        public async Task<IActionResult> ExportProjectOfficersZip([FromQuery] string? officeType)
         {
-            var officers = await _context.Project_Officers
+            var query = _context.Project_Officers
                 .Include(p => p.CreatedByUser)
                 .Include(p => p.ValidatedBy)
                 .Include(p => p.Template)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(officeType))
+            {
+                query = query.Where(p =>
+                    p.Template != null &&
+                    p.Template.Name != null &&
+                    p.Template.Name.Trim().ToLower() == officeType.Trim().ToLower());
+            }
+
+            var officers = await query
                 .OrderBy(p => p.Name)
                 .ToListAsync();
 
@@ -1094,19 +1105,19 @@ namespace Backend.Controllers
                     await using var entryStream = entry.Open();
                     await using var fileStream = new FileStream(signaturePath, FileMode.Open, FileAccess.Read);
                     await fileStream.CopyToAsync(entryStream);
+
                 }
             }
 
             zipStream.Position = 0;
 
-            var fileName =
-                $"Project_Officers_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+            var safeOfficeType = string.IsNullOrWhiteSpace(officeType)
+     ? "All"
+     : SanitizeFileName(officeType);
 
-            return File(
-                zipStream.ToArray(),
-                "application/zip",
-                fileName
-            );
+            var fileName = $"Project_Officers_{safeOfficeType}_{DateTime.Now:yyyyMMdd_HHmmss}.zip";
+
+            return File(zipStream.ToArray(), "application/zip", fileName);
         }
     }
 

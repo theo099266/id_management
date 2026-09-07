@@ -702,10 +702,10 @@ const handleExportZip = async () => {
   setIsExporting(true);
   try {
     const res = await api.get(`${ENDPOINT}/export-zip`, {
+      params: officeType ? { officeType } : {}, // "" (All) sends no param
       responseType: "blob",
     });
 
-    // Try to pull the filename the backend set, otherwise fall back
     const disposition = res.headers["content-disposition"];
     let filename = `Project_Officers_${Date.now()}.zip`;
     if (disposition) {
@@ -723,8 +723,6 @@ const handleExportZip = async () => {
     window.URL.revokeObjectURL(url);
   } catch (err) {
     console.error("Failed to export zip:", err);
-    console.error("Status:", err.response?.status);
-    console.error("Response:", err.response?.data);
     alert("Failed to export data. Check console for details.");
   } finally {
     setIsExporting(false);
@@ -932,12 +930,16 @@ const handleExportZip = async () => {
   </div>
   <div className="flex gap-3">
     <button
-      onClick={handleExportZip}
-      disabled={isExporting}
-      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 disabled:opacity-60"
-    >
-      {isExporting ? "Exporting..." : "Download All Data"}
-    </button>
+  onClick={handleExportZip}
+  disabled={isExporting}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg flex items-center gap-2 disabled:opacity-60"
+>
+  {isExporting
+    ? "Exporting..."
+    : officeType
+      ? `Download ${officeType} Data`
+      : "Download All Data"}
+</button>
     <button
       onClick={openCreateModal}
       className="bg-[#2E7D32] hover:bg-green-700 text-white px-5 py-3 rounded-lg flex items-center gap-2"
