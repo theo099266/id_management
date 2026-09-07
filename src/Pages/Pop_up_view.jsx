@@ -69,31 +69,32 @@ const cmToPx = (cm, dpi = 300) => Math.round((cm / 2.54) * dpi);
 const CARD_W_CM = 5.4;
 const CARD_H_CM = 8.56;
 
-const resizeProfilePhoto = (src, width = 432, height = 642) =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
+const resizeProfilePhoto = async (src, width = 432, height = 642) => {
+  if (!src) return null;
 
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
+  const blob = await (await fetch(src)).blob();
 
-      const scale = Math.max(width / img.width, height / img.height);
-      const drawWidth = img.width * scale;
-      const drawHeight = img.height * scale;
-
-      const x = (width - drawWidth) / 2;
-      const y = 0;
-
-      ctx.drawImage(img, x, y, drawWidth, drawHeight);
-      resolve(canvas.toDataURL("image/png"));
-    };
-
-    img.onerror = reject;
-    img.src = src;
+  const bitmap = await createImageBitmap(blob, {
+    imageOrientation: "from-image", 
   });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+
+  const scale = Math.max(width / bitmap.width, height / bitmap.height);
+  const drawWidth = bitmap.width * scale;
+  const drawHeight = bitmap.height * scale;
+
+  const x = (width - drawWidth) / 2;
+  const y = 0;
+
+  ctx.drawImage(bitmap, x, y, drawWidth, drawHeight);
+  bitmap.close();
+
+  return canvas.toDataURL("image/png");
+};
 
 const Pop_up_view = ({ employee, onClose, onEdit }) => {
   const frontRef = useRef(null);

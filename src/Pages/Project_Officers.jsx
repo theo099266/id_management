@@ -134,25 +134,100 @@ export default function ProjectOfficers() {
   };
   const handleRemoveBackgroundClick = async () => {
   setIsRemovingBg(true);
+
   try {
-    // Use the freshly-selected file if there is one, otherwise
-    // grab whatever image is currently shown (e.g. existing server image)
     const source = form.image || imagePreviewUrl;
-    if (!source) return;
 
+    if (!source) {
+      alert("Please select an image first.");
+      return;
+    }
     const resultBlob = await removeBackground(source);
-    const file = new File([resultBlob], "photo.png", { type: "image/png" });
 
+    const img = new Image();
+
+    const imageUrl = URL.createObjectURL(resultBlob);
+
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imageUrl;
+    });
+
+    const width = img.naturalWidth;
+    const height = img.naturalHeight;
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Could not create canvas context.");
+    }
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+
+    URL.revokeObjectURL(imageUrl);
+    const compressedBlob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to compress image."));
+          }
+        },
+        "image/webp",
+        0.85
+      );
+    });
+
+    console.log(
+      "Original background-removed size:",
+      (resultBlob.size / 1024 / 1024).toFixed(2),
+      "MB"
+    );
+
+    console.log(
+      "Compressed image size:",
+      (compressedBlob.size / 1024 / 1024).toFixed(2),
+      "MB"
+    );
+
+    console.log(
+      "Image dimensions:",
+      `${width} × ${height}`
+    );
+
+    const file = new File(
+      [compressedBlob],
+      "photo.webp",
+      {
+        type: "image/webp",
+      }
+    );
     if (imagePreviewUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreviewUrl);
     }
+    const newUrl = URL.createObjectURL(compressedBlob);
 
-    const newUrl = URL.createObjectURL(resultBlob);
-    setForm((prev) => ({ ...prev, image: file }));
+    setForm((prev) => ({
+      ...prev,
+      image: file,
+    }));
+
     setImagePreviewUrl(newUrl);
+
   } catch (err) {
-    console.error("Background removal failed", err);
-    alert("Couldn't remove the background. Try again.");
+    console.error("Background removal failed:", err);
+
+    alert(
+      "Couldn't remove or compress the background. Please try again."
+    );
   } finally {
     setIsRemovingBg(false);
   }
