@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 import SignaturePad from "../components/Signature_Pad";
 import Pop_up_view from "./Pop_up_view";
-import api, { API_BASE_URL } from "../api/axios";
+import api, { API_BASE_URL, directApi } from "../api/axios";
 import { startSignature } from "../Components/TopazService";
 import useDragAndDrop from "../components/useDragAndDrop";
 import { useModalClose } from "../components/Clickouside";
@@ -817,17 +817,17 @@ const handleExportZip = async () => {
       form.removeImageBackground ? "true" : "false",
     );
 
-      if (editingItem) {
-    await api.put(`${ENDPOINT}/${editingItem.id}`, formData);
-    savedId = editingItem.id;
-  } else {
-    const createRes = await api.post(ENDPOINT, formData);
-    savedId = createRes.data?.id ?? createRes.data?.ID;
-  }
+     if (editingItem) {
+  await directApi.put(`${ENDPOINT}/${editingItem.id}`, formData);
+  savedId = editingItem.id;
+} else {
+  const createRes = await directApi.post(ENDPOINT, formData);
+  savedId = createRes.data?.id ?? createRes.data?.ID;
+}
 
-  const res = await api.get(ENDPOINT);
-  const freshOfficers = res.data || [];
-  setOfficers(freshOfficers);
+const res = await api.get(ENDPOINT); // this stays as-is, no file payload
+const freshOfficers = res.data || [];
+setOfficers(freshOfficers);
 
   const savedOfficer =
     freshOfficers.find((o) => o.id === savedId) ||
