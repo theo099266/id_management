@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../config/routes";
+import { useModalClose } from "./Clickouside";
 const menuItems = [
   {
     text: "Dashboard",
@@ -43,6 +44,7 @@ const menuItems = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const { overlayProps, contentProps } = useModalClose(onClose);
 
   const user = (() => {
     if (typeof window === "undefined") return null;
@@ -65,25 +67,16 @@ export default function Sidebar({ isOpen, onClose }) {
     <>
       {/* backdrop — mobile only, shown while sidebar is open */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/40 z-30 md:hidden" {...overlayProps} />
       )}
 
       <div
+        {...contentProps}
         className={`fixed md:static top-0 left-0 h-full md:h-auto md:min-h-screen w-64
         bg-[#f7f7f7] text-white-800 shadow-lg border-r border-green-300 z-40
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
-        <button
-          onClick={onClose}
-          className="md:hidden absolute top-4 right-4 text-xl text-[#0a0e0a]"
-        >
-          <FaTimes />
-        </button>
-
         <div className="p-6 text-center">
           <img src={logo} className="w-20 mx-auto" />
           <h2 className="font-bold mt-3">NIA ID System</h2>
