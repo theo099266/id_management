@@ -14,6 +14,7 @@ import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import useTableSort from "../components/useTableSort";
 import SortableHeader from "../components/SortableHeader";
+import { createPortal } from "react-dom";
 const TEMPLATE_PATH = "/Template";
 
 const emptyForm = {
@@ -501,15 +502,16 @@ export default function Template() {
       </div>
 
       {/* Create / Edit modal */}
-      {showModal && (
-        <div
-          className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
-          {...createOverlayProps}
-        >
+       {showModal &&
+        createPortal(
           <div
-            className="bg-white rounded-xl shadow-lg w-750px max-h-[92vh] overflow-y-auto p-6"
-            {...createContentProps}
+            className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
+            {...createOverlayProps}
           >
+            <div
+              className="bg-white rounded-xl shadow-lg w-750px max-h-[92vh] overflow-y-auto p-6"
+              {...createContentProps}
+            >
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-2xl font-bold text-green-800">
                 {editingItem ? "Edit" : "Add"} Template
@@ -683,8 +685,9 @@ export default function Template() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* View-only modal */}
       {viewItem && (

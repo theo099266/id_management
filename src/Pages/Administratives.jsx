@@ -15,6 +15,7 @@ import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import useTableSort from "../components/useTableSort";
 import SortableHeader from "../components/SortableHeader";
+import { createPortal } from "react-dom";
 const ENDPOINT = "/Administrative";
 
 const emptyForm = {
@@ -465,7 +466,7 @@ const getImageUrl = (path) => {
       </div>
 
       {/* Create / Edit modal */}
-      {showModal && (
+      {showModal && createPortal(
         <div
           className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
           {...createOverlayProps}
@@ -639,8 +640,9 @@ const getImageUrl = (path) => {
               </button>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* View-only modal */}
       {viewItem && (

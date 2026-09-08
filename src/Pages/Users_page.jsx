@@ -13,6 +13,7 @@ import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import useTableSort from "../components/useTableSort";
 import SortableHeader from "../components/SortableHeader";
+import { createPortal } from "react-dom";
 const BACKEND_URL = "https://id-management-api.runasp.net";
 
 const getImageSrc = (path) => {
@@ -477,7 +478,7 @@ export default function Templates() {
           </tbody>
         </table>
       </div>
-      {showModal && (
+      {showModal && createPortal (
         <div
           className="fixed inset-0 bg-black/10 flex justify-center items-center z-50"
           {...overlayProps}
@@ -685,8 +686,9 @@ export default function Templates() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
       <ConfirmDeleteModal
         open={deleteModal.open}
         loading={deleting}

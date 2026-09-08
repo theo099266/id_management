@@ -17,6 +17,7 @@ import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import DatePicker from "../components/DatePicker";
 import { removeBackground } from "@imgly/background-removal";
+import { createPortal } from "react-dom";
 const ENDPOINT = "/ProjectOfficers";
 
 const BLOOD_TYPES = [
@@ -1125,15 +1126,16 @@ setOfficers(freshOfficers);
       </div>
 
       {/* Create / Edit modal */}
-      {showModal && (
-        <div
-          className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
-          {...overlayProps}
-        >
+      {showModal &&
+        createPortal(
           <div
-            className="bg-white rounded-xl shadow-lg w-237.5 max-h-[92vh] overflow-y-auto p-6"
-            {...contentProps}
+            className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
+            {...overlayProps}
           >
+            <div
+              className="bg-white rounded-xl shadow-lg w-237.5 max-h-[92vh] overflow-y-auto p-6"
+              {...contentProps}
+            >
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-2xl font-bold text-green-800">
                 {editingItem ? "Edit" : "Add"} Project Officer
@@ -1749,9 +1751,9 @@ setOfficers(freshOfficers);
               </button>
             </div>
           </div>
-        </div>
-      )}
-
+          </div>,
+          document.body,
+        )}
       {(viewItem || previewItem) && (
         <Pop_up_view
           employee={viewItem || previewItem}
