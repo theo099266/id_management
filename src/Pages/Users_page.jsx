@@ -70,6 +70,7 @@ export default function Templates() {
   });
 
   const [deleting, setDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { isDragging, handleDragOver, handleDragLeave, handleDrop } =
     useDragAndDrop({
       onFile: (file) => {
@@ -228,6 +229,7 @@ export default function Templates() {
       return;
     }
 
+    setIsSaving(true);
     try {
       clearErrors();
 
@@ -242,14 +244,10 @@ export default function Templates() {
       if (form.image) formData.append("Image", form.image);
 
       if (editUser) {
-        // Update user information
         await directApi.put(`/users/${editUser.id}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
 
-        // Change password only if something was entered
         if (form.passwordHash.trim() !== "") {
           await api.post("/Auth/admin-reset-password", {
             userId: editUser.id,
@@ -258,13 +256,10 @@ export default function Templates() {
         }
       } else {
         await directApi.post("/Auth/register", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         });
       }
 
-      // refresh list
       const response = await api.get("/users");
       setUsers(response.data);
       setShowModal(false);
@@ -301,6 +296,8 @@ export default function Templates() {
       } else {
         setErrorMessage("Unable to connect to the server.");
       }
+    } finally {
+      setIsSaving(false);
     }
   };
   return (
@@ -673,16 +670,18 @@ export default function Templates() {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-5 py-2 border rounded"
+                disabled={isSaving}
+                className="px-5 py-2 border rounded disabled:opacity-60"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleSave}
-                className="px-5 py-2 bg-green-700 text-white rounded"
+                disabled={isSaving}
+                className="px-5 py-2 bg-green-700 text-white rounded disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {editUser ? "Update" : "Save"}
+                {isSaving ? "Saving..." : editUser ? "Update" : "Save"}
               </button>
             </div>
           </div>
