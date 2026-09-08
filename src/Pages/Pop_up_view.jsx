@@ -5,7 +5,7 @@ import BackID from "../components/id-card/BackID";
 import "../styles/dashboard.css";
 import { FaEdit } from "react-icons/fa";
 import { API_BASE_URL } from "../api/axios";
-
+import { createPortal } from "react-dom";
 // Converts an image URL to a base64 data URL, sidestepping CORS entirely
 const toDataUrl = async (url, { retries = 2, delayMs = 400 } = {}) => {
   if (!url) return null;
@@ -370,7 +370,7 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
   );
 };
 
-  return (
+  return createPortal (
     <div
       className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
       onClick={onClose}
@@ -544,7 +544,8 @@ const handleDownloadBack = (backRef, finalEmployeeData) =>
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
