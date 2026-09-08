@@ -48,11 +48,12 @@ export default function Templates() {
   });
   const [templates, setTemplates] = useState([]);
 
-useEffect(() => {
-  api.get("/Template")
-    .then((res) => setTemplates(res.data || []))
-    .catch((err) => console.error("Failed to load templates", err));
-}, []);
+  useEffect(() => {
+    api
+      .get("/Template")
+      .then((res) => setTemplates(res.data || []))
+      .catch((err) => console.error("Failed to load templates", err));
+  }, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -249,7 +250,7 @@ useEffect(() => {
         });
 
         // Change password only if something was entered
-         if (form.passwordHash.trim() !== "") {
+        if (form.passwordHash.trim() !== "") {
           await api.post("/Auth/admin-reset-password", {
             userId: editUser.id,
             newPassword: form.passwordHash,
@@ -584,7 +585,9 @@ useEffect(() => {
                     onChange={(e) => handleFieldChange("role", e.target.value)}
                     className={`w-full border p-2 rounded ${fieldErrors.role ? "border-red-500 focus:ring-2 focus:ring-red-300" : "border-gray-300"}`}
                   >
-                    <option value="" disabled>Select Role</option>
+                    <option value="" disabled>
+                      Select Role
+                    </option>
                     <option value="Administrator">Administrator</option>
                   </select>
                   {fieldErrors.role && (
@@ -611,8 +614,6 @@ useEffect(() => {
                     </p>
                   )}
                 </div>
-
-            
               </div>
 
               <div className="border rounded p-3 mt-2">
@@ -634,11 +635,11 @@ useEffect(() => {
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   className={`w-full border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition
-                  ${
-                    isDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
-                  }`}
+  ${
+    isDragging
+      ? "border-blue-500 bg-blue-50"
+      : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+  }`}
                 >
                   {preview ? (
                     <img

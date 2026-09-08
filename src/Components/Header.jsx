@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaBars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../api/axios";
 
@@ -7,7 +7,6 @@ const BACKEND_URL = "https://id-management-api.runasp.net";
 
 const getImageSrc = (path) => {
   if (!path) return "";
-
   if (
     path.startsWith("http://") ||
     path.startsWith("https://") ||
@@ -16,11 +15,10 @@ const getImageSrc = (path) => {
   ) {
     return path;
   }
-
   return `${BACKEND_URL}/${path.replace(/^\/+/, "")}`;
 };
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
@@ -44,11 +42,15 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="bg-[#81e987] shadow-lg px-8 py-4 flex justify-between items-center">
-      <div className="text-2xl text-green-700 cursor-pointer" />
+    <div className="bg-[#81e987] shadow-lg px-4 md:px-8 py-4 flex justify-between items-center">
+      <button
+        onClick={onMenuClick}
+        className="md:hidden text-2xl text-green-900 cursor-pointer"
+      >
+        <FaBars />
+      </button>
 
-      <div className="relative" ref={dropdownRef}>
-        {/* User Icon + Name */}
+      <div className="relative ml-auto" ref={dropdownRef}>
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => setShowLogout(!showLogout)}
@@ -69,7 +71,6 @@ export default function Header() {
           <span className="font-semibold">{user?.name || "Guest"}</span>
         </div>
 
-        {/* Dropdown */}
         {showLogout && (
           <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-50">
             <button

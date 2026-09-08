@@ -4,8 +4,7 @@ import {
   FaFileAlt,
   FaFolderOpen,
   FaUsers,
-  FaPalette,
-  FaPen,
+  FaTimes,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { routes } from "../config/routes";
@@ -42,12 +41,11 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const user = (() => {
     if (typeof window === "undefined") return null;
-
     try {
       return JSON.parse(localStorage.getItem("user")) || null;
     } catch {
@@ -56,27 +54,54 @@ export default function Sidebar() {
   })();
 
   const role = user?.role || "";
-  const visibleMenu = routes.filter((route) => route.roles[user.role]);
+  const visibleMenu = routes.filter((route) => route.roles[user?.role]);
+
+  const handleNavigate = (path) => {
+    navigate(path);
+    onClose?.(); // auto-close on mobile after picking a page
+  };
 
   return (
-    <div className="w-64 bg-[#f7f7f7] text-white-800 min-h-screen shadow-lg border-r border-green-300">
-      <div className="p-6 text-center">
-        <img src={logo} className="w-20 mx-auto" />
-        <h2 className="font-bold mt-3">NIA ID System</h2>
-        {role ? <p className="text-sm text-green-700 mt-2">{role}</p> : null}
-      </div>
+    <>
+      {/* backdrop — mobile only, shown while sidebar is open */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      <nav className="mt-8 space-y-2">
-        {visibleMenu.map((route) => (
-          <Menu
-            key={route.key}
-            icon={route.icon}
-            text={route.title}
-            onClick={() => navigate(route.path)}
-          />
-        ))}
-      </nav>
-    </div>
+      <div
+        className={`fixed md:static top-0 left-0 h-full md:h-auto md:min-h-screen w-64
+        bg-[#f7f7f7] text-white-800 shadow-lg border-r border-green-300 z-40
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+      >
+        <button
+          onClick={onClose}
+          className="md:hidden absolute top-4 right-4 text-xl text-[#0a0e0a]"
+        >
+          <FaTimes />
+        </button>
+
+        <div className="p-6 text-center">
+          <img src={logo} className="w-20 mx-auto" />
+          <h2 className="font-bold mt-3">NIA ID System</h2>
+          {role ? <p className="text-sm text-green-700 mt-2">{role}</p> : null}
+        </div>
+
+        <nav className="mt-8 space-y-2">
+          {visibleMenu.map((route) => (
+            <Menu
+              key={route.key}
+              icon={route.icon}
+              text={route.title}
+              onClick={() => handleNavigate(route.path)}
+            />
+          ))}
+        </nav>
+      </div>
+    </>
   );
 }
 
