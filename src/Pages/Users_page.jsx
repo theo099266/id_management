@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import api, { API_BASE_URL } from "../api/axios";
+import api, { API_BASE_URL, directApi } from "../api/axios";
 import {
   FaSearch,
   FaPlus,
@@ -242,21 +242,21 @@ useEffect(() => {
 
       if (editUser) {
         // Update user information
-        await api.put(`/users/${editUser.id}`, formData, {
+        await directApi.put(`/users/${editUser.id}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
 
         // Change password only if something was entered
-        if (form.passwordHash.trim() !== "") {
+         if (form.passwordHash.trim() !== "") {
           await api.post("/Auth/admin-reset-password", {
             userId: editUser.id,
             newPassword: form.passwordHash,
           });
         }
       } else {
-        await api.post("/Auth/register", formData, {
+        await directApi.post("/Auth/register", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },

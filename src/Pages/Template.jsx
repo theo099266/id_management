@@ -8,7 +8,7 @@ import {
   FaEye,
   FaTimes,
 } from "react-icons/fa";
-import api, { API_BASE_URL } from "../api/axios";
+import api, { API_BASE_URL, directApi } from "../api/axios";
 import useDragAndDrop from "../components/useDragAndDrop";
 import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
@@ -293,11 +293,11 @@ export default function Template() {
       });
 
       if (editingItem) {
-        await api.put(`${TEMPLATE_PATH}/${editingItem.templateID}`, formData, {
+        await directApi.put(`${TEMPLATE_PATH}/${editingItem.templateID}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await api.post(TEMPLATE_PATH, formData, {
+        await directApi.post(TEMPLATE_PATH, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }

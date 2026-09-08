@@ -9,7 +9,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import SignaturePad from "../components/Signature_Pad";
-import api, { API_BASE_URL } from "../api/axios";
+import api, { API_BASE_URL, directApi } from "../api/axios";
 import { startSignature } from "../Components/TopazService";
 import { useModalClose } from "../components/Clickouside";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
@@ -257,7 +257,7 @@ const getImageUrl = (path) => {
   };
 
   //save / delete
-  const handleSave = async () => {
+ const handleSave = async () => {
     setIsSaving(true);
     const name = form.name.trim().toUpperCase();
     const office = form.office.trim();
@@ -274,12 +274,12 @@ const getImageUrl = (path) => {
         formData.append("RemoveSignatureImage", "true");
 
       if (editingItem) {
-        await api.put(
-  `${ENDPOINT}/${editingItem.administrativeID}`,
-  formData
-);
+        await directApi.put(
+          `${ENDPOINT}/${editingItem.administrativeID}`,
+          formData
+        );
       } else {
-        await api.post(ENDPOINT, formData);
+        await directApi.post(ENDPOINT, formData);
       }
 
       await loadAdministratives();
