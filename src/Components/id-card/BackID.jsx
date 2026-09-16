@@ -66,7 +66,7 @@ const POS = {
   contact: {
     number: { x: 280, y: VB_H * 0.3 },
     dob: { x: 285, y: VB_H * 0.3 + 20 },
-    blood: { x: 310, y: VB_H * 0.3 + 41 },
+    blood: { x: 310, y: VB_H * 0.3 + 40 },
   },
 
   emergency: {

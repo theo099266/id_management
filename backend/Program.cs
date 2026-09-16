@@ -117,8 +117,24 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.Services.AddRateLimiter(options =>
 {
-    // Global limiter — applies to ALL requests, no attribute needed
+    // Card rendering can request several images per officer. Static assets and
+    // image-normalization endpoints are read-only and are protected by their
+    // own authorization rules, so they must not consume the API request quota.
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        var path = context.Request.Path;
+        var isCardAssetRequest =
+            path.StartsWithSegments("/uploads") ||
+            path.StartsWithSegments("/api/files") ||
+            path.StartsWithSegments("/api/photos/normalized") ||
+            path.StartsWithSegments("/api/signatures/normalized");
+
+        if (isCardAssetRequest)
+        {
+            return RateLimitPartition.GetNoLimiter("card-assets");
+        }
+
+        return
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
@@ -127,7 +143,8 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 0
-            }));
+            });
+    });
 
     // Keep your stricter named policy for login specifically
     options.AddPolicy("login", context =>
