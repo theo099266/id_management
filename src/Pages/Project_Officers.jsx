@@ -18,6 +18,8 @@ import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import DatePicker from "../components/DatePicker";
 import { removeBackground } from "@imgly/background-removal";
 import { createPortal } from "react-dom";
+import JSZip from "jszip";
+import BatchCardRenderer from "../components/id-card/BatchCardRenderer";
 const ENDPOINT = "/ProjectOfficers";
 
 const BLOOD_TYPES = [
@@ -81,6 +83,27 @@ export default function ProjectOfficers() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [isRenaming, setIsRenaming] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [batchRenderItem, setBatchRenderItem] = useState(null);
+  const batchRenderResolver = useRef(null);
+
+  const handleBatchRendered = useCallback((cards) => {
+    batchRenderResolver.current?.resolve(cards);
+    batchRenderResolver.current = null;
+    setBatchRenderItem(null);
+  }, []);
+
+  const handleBatchRenderError = useCallback((error) => {
+    batchRenderResolver.current?.reject(error);
+    batchRenderResolver.current = null;
+    setBatchRenderItem(null);
+  }, []);
+
+  const renderOfficerCards = useCallback((officer) => {
+    return new Promise((resolve, reject) => {
+      batchRenderResolver.current = { resolve, reject };
+      setBatchRenderItem(officer);
+    });
+  }, []);
 
   const handleSignatureDropFile = useCallback(
     (file) => {
@@ -714,7 +737,26 @@ const handleExportZip = async () => {
       if (match?.[1]) filename = match[1];
     }
 
-    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const zip = await JSZip.loadAsync(res.data);
+    const officersToExport = officeType
+      ? officers.filter(
+          (officer) =>
+            (officer.templateName || "").trim().toLowerCase() ===
+            officeType.trim().toLowerCase(),
+        )
+      : officers;
+
+    for (const officer of officersToExport) {
+      const cards = await renderOfficerCards(officer);
+      const safeName = (officer.name || "employee").replace(/[\\/:*?"<>|]+/g, "_");
+      const employeeId = (officer.employee_Id_NO || officer.id || "unknown").toString();
+
+      zip.file(`id-cards/${employeeId}_${safeName}_front.jpg`, cards.front.blob);
+      zip.file(`id-cards/${employeeId}_${safeName}_back.jpg`, cards.back.blob);
+    }
+
+    const finalZip = await zip.generateAsync({ type: "blob" });
+    const url = window.URL.createObjectURL(finalZip);
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", filename);
@@ -1766,6 +1808,13 @@ setOfficers(freshOfficers);
             setPreviewItem(null);
             openEditModal(employeeToEdit);
           }}
+        />
+      )}
+      {batchRenderItem && (
+        <BatchCardRenderer
+          employee={batchRenderItem}
+          onRendered={handleBatchRendered}
+          onError={handleBatchRenderError}
         />
       )}
       <ConfirmDeleteModal
